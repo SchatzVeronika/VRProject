@@ -162,6 +162,7 @@ int main(int argc, char* argv[])
 #endif
 
 	const std::string sourceV = "#version 330 core\n"
+		// position, tex_coord and normals come from obj file and are progressed in object.h
 		"in vec3 position; \n"
 		"in vec2 tex_coord; \n"
 		"in vec3 normal;"
@@ -194,6 +195,7 @@ int main(int argc, char* argv[])
 
 		// establish light
 		"struct Light{\n"
+		//"vec3 light_color;"
 		"vec3 light_pos; \n"
 		"float ambient_strength; \n"
 		"float diffuse_strength; \n"
@@ -224,10 +226,12 @@ int main(int argc, char* argv[])
 		"float diffuse = light.diffuse_strength * max(dot(N,L),0.0);\n"
 		"float distance = length(light.light_pos - v_frag_coord);"
 		"float attenuation = 1 / (light.constant + light.linear * distance + light.quadratic * distance * distance);"
-		//"float light = light.ambient_strength + attenuation * (diffuse + 0.0);  \n" // + attenuation * (diffuse + 0.0)
-		"float light = light.ambient_strength + attenuation * diffuse;\n"
-
-		"FragColor = vec4(vec3(texture(ourTexture, TexCoord)) * vec3(light), 1.0); "
+		"float light = light.ambient_strength + attenuation * (diffuse + specular);  \n" // + attenuation * (diffuse + 0.0)
+		//"light = light.ambient_strength + attenuation * diffuse;"
+		//"float light = light.ambient_strength + attenuation * diffuse;\n"
+		//"FragColor = vec4(vec3(texture(ourTexture, TexCoord)) * vec3(light), 1.0); "
+		" FragColor = vec4(texture(ourTexture, TexCoord).xyz  * light, 1.0);"
+		//"FragColor = vec4(light.light_color, 1.0);"
 		//"FragColor = vec4(materialColour * vec3(light), 1.0); \n"
 		"} \n";
 
@@ -273,11 +277,13 @@ int main(int argc, char* argv[])
 		}
 		};
 
-	glm::vec3 light_pos = glm::vec3(-4.0, 0.0, 1.5);
+	
 	glm::mat4 model = glm::mat4(1.0);
-	model = glm::rotate(model, (float)-3.14 / 4, glm::vec3(1.0f, 0.0f, 0.0f));
 	//model = glm::translate(model, glm::vec3(0.5, 0.5, -1.0));
 	model = glm::scale(model, glm::vec3(0.5, 0.5, 0.5));
+	model = glm::rotate(model, (float)-3.14 / 4, glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::vec3 light_pos = glm::vec3(0.0, 4.0, 1.3);
+	glm::vec3 light_col = glm::vec3(1.0, 0.0, 0.0);
 	
 
 	glm::mat4 inverseModel = glm::transpose(glm::inverse(model));
@@ -285,10 +291,10 @@ int main(int argc, char* argv[])
 	glm::mat4 view = camera.GetViewMatrix();
 	glm::mat4 perspective = camera.GetProjectionMatrix();
 
-	float ambient = 0.4;
+	float ambient = 0.5;
 	float diffuse = 0.9;
 	float specular = 0.4;
-	float shininess = 64.0;
+	float shininess = 2.0;
 
 	shader.use();
 	shader.setFloat("shininess", shininess);
@@ -318,6 +324,7 @@ int main(int argc, char* argv[])
 		shader.setMatrix4("P", perspective);
 		shader.setInteger("ourTexture", 0);
 		shader.setVector3f("light.light_pos", light_pos);
+		shader.setVector3f("light.light_color", light_col);
 		shader.setVector3f("u_view_pos", camera.Position);
 
 		glActiveTexture(GL_TEXTURE0);
