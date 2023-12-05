@@ -430,7 +430,7 @@ int main(int argc, char* argv[])
 void loadCubemapFace(const char* path, const GLenum& targetFace)
 {
 	int imWidth, imHeight, imNrChannels;
-	stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load(false);
 	unsigned char* data = stbi_load(path, &imWidth, &imHeight, &imNrChannels, 0);
 	if (data)
 	{
