@@ -13,13 +13,13 @@
 
 #include <map>
 
-#include "../../camera.h"
-#include "../../shader.h"
-#include "../object.h"
+#include "camera.h"
+#include "shader.h"
+#include "object.h"
 
 
-const int width = 800;
-const int height = 800;
+const int window_width = 800;
+const int window_height = 800;
 
 
 GLuint compileShader(std::string shaderCode, GLenum shaderType);
@@ -27,7 +27,6 @@ GLuint compileProgram(GLuint vertexShader, GLuint fragmentShader);
 void processInput(GLFWwindow* window);
 
 void loadCubemapFace(const char* file, const GLenum& targetCube);
-
 
 #ifndef NDEBUG
 void APIENTRY glDebugOutput(GLenum source,
@@ -107,18 +106,9 @@ GLuint loadTexture(const char* path) {
 Camera camera(glm::vec3(-1.0, 0.0, 50.0));
 
 
-
 int main(int argc, char* argv[])
 {
-	std::cout << "Welcome to exercice 2: " << std::endl;
-	std::cout << "Object reader\n"
-		"Make an object reader and load one of the .obj file\n"
-		"You can also make your own object in Blender then save it as a .obj \n"
-		"You will need to: \n"
-		"	- Understand what a Wavefront .obj file contain\n"
-		"	- Open the .obj and read the relevant data \n"
-		"	- Stock the data in the relevant format  \n"
-		"	- Use the relevant buffer (VAO & VBO) to be able to draw your object  \n";
+	std::cout << "Welcome to the demo by Igors and Veronika" << std::endl;
 
 	//Boilerplate
 	//Create the OpenGL context
@@ -136,7 +126,7 @@ int main(int argc, char* argv[])
 
 
 	//Create the window
-	GLFWwindow* window = glfwCreateWindow(width, height, "Solution 02", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Main_Window", nullptr, nullptr);
 	if (window == NULL)
 	{
 		glfwTerminate();
@@ -249,11 +239,9 @@ int main(int argc, char* argv[])
 		"} \n";
 
 
-
 	char fileFrag[128] = PATH_TO_SHADERS"/FragmentShader.frag";
 	Shader shader(sourceV, sourceF);
 	Shader shader_sphere(sourceV, sourceF_sphere);
-
 
 	const std::string sourceVCubeMap = "#version 330 core\n"
 		"in vec3 position; \n"
@@ -292,10 +280,10 @@ int main(int argc, char* argv[])
 
 	Shader cubeMapShader = Shader(sourceVCubeMap, sourceFCubeMap);
 
-	char path_text[] = PATH_TO_TEXTURE "/textureChessBoard.JPG";
+	char path_text[] = PATH_TO_TEXTURE"/textureChessBoard.JPG";
 	GLuint texture = loadTexture(path_text);
 
-	char path[] = PATH_TO_OBJECTS "/ChessBoard.obj";
+	char path[] = PATH_TO_OBJECTS"/ChessBoard.obj";
 
 	Object board(path);
 	board.makeObject(shader);
@@ -308,7 +296,7 @@ int main(int argc, char* argv[])
 	sphere3.model = glm::scale(sphere3.model, glm::vec3(1.5, 1.5, 1.5));
 
 
-	char pathCube[] = PATH_TO_OBJECTS "/cube.obj";
+	char pathCube[] = PATH_TO_OBJECTS"/cube.obj";
 	Object cubeMap(pathCube);
 	cubeMap.makeObject(cubeMapShader);
 
@@ -368,7 +356,7 @@ int main(int argc, char* argv[])
 
 	//stbi_set_flip_vertically_on_load(true);
 
-	std::string pathToCubeMap = PATH_TO_TEXTURE "/cubemaps/yokohama3/";
+	std::string pathToCubeMap = PATH_TO_TEXTURE"/cubemaps/yokohama3/";
 
 	std::map<std::string, GLenum> facesToLoad = {
 		{pathToCubeMap + "posx.jpg",GL_TEXTURE_CUBE_MAP_POSITIVE_X},
@@ -428,17 +416,13 @@ int main(int argc, char* argv[])
 		cubeMap.draw();
 		glDepthFunc(GL_LESS);
 
-
-
-
 		fps(now);
 		glfwSwapBuffers(window);
 	}
 
-	//clean up ressource
+	//clean up resources
 	glfwDestroyWindow(window);
 	glfwTerminate();
-
 	return 0;
 }
 
@@ -486,6 +470,4 @@ void processInput(GLFWwindow* window) {
 		camera.ProcessKeyboardRotation(0.0, 1.0, 1);
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 		camera.ProcessKeyboardRotation(0.0, -1.0, 1);
-
-
 }

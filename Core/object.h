@@ -46,7 +46,6 @@ public:
 
 		// read file line by line
 		std::ifstream infile(path);
-		//TODO Error management
 		std::string line;
 		while (std::getline(infile, line))
 		{
