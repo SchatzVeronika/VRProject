@@ -103,7 +103,7 @@ GLuint loadTexture(const char* path) {
 	return texture;
 }
 
-Camera camera(glm::vec3(-1.0, 0.0, 50.0));
+Camera camera(glm::vec3(0.0, 30.0, 60.0));
 
 
 int main(int argc, char* argv[])
@@ -280,25 +280,6 @@ int main(int argc, char* argv[])
 
 	Shader cubeMapShader = Shader(sourceVCubeMap, sourceFCubeMap);
 
-	char path_text[] = PATH_TO_TEXTURE"/textureChessBoard.JPG";
-	GLuint texture = loadTexture(path_text);
-
-	char path[] = PATH_TO_OBJECTS"/ChessBoard.obj";
-
-	Object board(path);
-	board.makeObject(shader);
-
-	// add a sphere in origin for reference
-	char path3[] = PATH_TO_OBJECTS"/sphere_smooth.obj";
-	Object sphere3(path3);
-	sphere3.makeObject(shader);
-	sphere3.model = glm::translate(sphere3.model, glm::vec3(0.0, 0.0, 0.0));
-	sphere3.model = glm::scale(sphere3.model, glm::vec3(1.5, 1.5, 1.5));
-
-
-	char pathCube[] = PATH_TO_OBJECTS"/cube.obj";
-	Object cubeMap(pathCube);
-	cubeMap.makeObject(cubeMapShader);
 
 	double prev = 0;
 	int deltaFrame = 0;
@@ -314,18 +295,62 @@ int main(int argc, char* argv[])
 		}
 		};
 
-	glm::vec3 light_pos = glm::vec3(0.0, 4.0, 1.3);
-	glm::vec3 light_col = glm::vec3(1.0, 0.0, 0.0);
-	glm::mat4 model = glm::mat4(1.0);
-	//model = glm::translate(model, glm::vec3(0.5, 0.5, -1.0));
-	model = glm::scale(model, glm::vec3(0.5, 0.5, 0.5));
-	model = glm::rotate(model, (float)-3.14 / 4, glm::vec3(1.0f, 0.0f, 0.0f));
-	
 
+	// loading the objects:
+	// board
+	char path_text[] = PATH_TO_TEXTURE"/textureChessBoard.JPG";
+	GLuint texture = loadTexture(path_text);
+	char path[] = PATH_TO_OBJECTS"/ChessBoard.obj";
+	Object board(path);
+	board.makeObject(shader);
+
+	// load and arrange pawns
+	char path_text_pawn[] = PATH_TO_TEXTURE"/texPawn.jpg";
+	GLuint texture_pawn = loadTexture(path_text_pawn);
+	char pathPawn[] = PATH_TO_OBJECTS"/pawn.obj";
+	std::vector<Object> pawns;
+	for (int i = 0; i < 4; i++) {
+		Object pawn(pathPawn);
+		pawn.model = glm::scale(pawn.model, glm::vec3(0.3, 0.3, 0.3));
+		pawn.model = glm::rotate(pawn.model, (float)-3.14 / 2, glm::vec3(1.0f, 0.0f, 0.0f));
+		pawn.model = glm::translate(pawn.model, glm::vec3(5.0 + 7.5 * i, 8.0, 3.4));
+		pawn.makeObject(shader);
+		pawns.push_back(pawn);
+	}
+
+	// add a sphere in origin for reference
+	char path3[] = PATH_TO_OBJECTS"/sphere_smooth.obj";
+	Object sphere3(path3);
+	sphere3.makeObject(shader);
+
+	// cubemap (background)
+	char pathCube[] = PATH_TO_OBJECTS"/cube.obj";
+	Object cubeMap(pathCube);
+	cubeMap.makeObject(cubeMapShader);
+
+
+	// orienting the objects in the scene:
+	// sphere
+	sphere3.model = glm::translate(sphere3.model, glm::vec3(0.0, 0.0, 0.0));
+	sphere3.model = glm::scale(sphere3.model, glm::vec3(1.5, 1.5, 1.5));
+
+	// board
+	glm::mat4 model = glm::mat4(1.0);
+	//model = glm::translate(model, glm::vec3(0.0, 0.0, -10.0));
+	board.model = glm::scale(board.model, glm::vec3(0.5, 0.5, 0.5));
+	board.model = glm::rotate(board.model, (float)-3.14 / 2, glm::vec3(1.0f, 0.0f, 0.0f));
 	glm::mat4 inverseModel = glm::transpose(glm::inverse(model));
 
+
+
+	// camera variables:
 	glm::mat4 view = camera.GetViewMatrix();
 	glm::mat4 perspective = camera.GetProjectionMatrix();
+
+
+	// light:
+	glm::vec3 light_pos = glm::vec3(0.0, 4.0, 1.3);
+	glm::vec3 light_col = glm::vec3(1.0, 0.0, 0.0);
 
 	float ambient = 0.5;
 	float diffuse = 0.9;
@@ -342,6 +367,7 @@ int main(int argc, char* argv[])
 	shader.setFloat("light.quadratic", 0.07);
 
 
+	// give texture to background (cubmap)
 	GLuint cubeMapTexture;
 	glGenTextures(1, &cubeMapTexture);
 	glActiveTexture(GL_TEXTURE0);
@@ -353,8 +379,6 @@ int main(int argc, char* argv[])
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	//stbi_set_flip_vertically_on_load(true);
 
 	std::string pathToCubeMap = PATH_TO_TEXTURE"/cubemaps/yokohama3/";
 
@@ -382,31 +406,46 @@ int main(int argc, char* argv[])
 		double now = glfwGetTime();
 		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		// initialize rendering (send parameters to the shader)
 		shader.use();
-		shader.setMatrix4("M", model);
-		shader.setMatrix4("itM", inverseModel);
 		shader.setMatrix4("V", view);
 		shader.setMatrix4("P", perspective);
-		shader.setInteger("ourTexture", 0);
 		shader.setVector3f("light.light_pos", light_pos);
 		shader.setVector3f("light.light_color", light_col);
 		shader.setVector3f("u_view_pos", camera.Position);
 
+		// render the board
+		shader.setMatrix4("M", board.model);
+		shader.setMatrix4("itM", inverseModel);
+		shader.setInteger("ourTexture", 0);
+		// add texture to board
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glDepthFunc(GL_LEQUAL);
 		board.draw();
+		
+		// render the pawns
+		for (auto& pawn : pawns) {
+			shader.use();
+			shader.setMatrix4("M", pawn.model);
+			shader.setMatrix4("itM", inverseModel);
+			shader.setInteger("ourTexture", 0);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture_pawn);
+			glDepthFunc(GL_LEQUAL);
+			pawn.draw();
+		}
+		
 
-		// sphere
+		// render the sphere
 		shader_sphere.use();
 		shader_sphere.setMatrix4("V", view);
 		shader_sphere.setMatrix4("P", perspective);
 		shader_sphere.setMatrix4("itM", inverseModel);
 		shader_sphere.setMatrix4("M", sphere3.model);
-		//sphere3.draw();
+		sphere3.draw();
 
-
+		// render the cubemap
 		cubeMapShader.use();
 		cubeMapShader.setMatrix4("V", view);
 		cubeMapShader.setMatrix4("P", perspective);
