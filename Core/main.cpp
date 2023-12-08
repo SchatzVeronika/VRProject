@@ -108,6 +108,7 @@ Camera camera(glm::vec3(0.0, 30.0, 60.0));
 // we need to make sure that the keys for selecting the pieces are only selected ones and not continuously:
 bool nKeyPressed = false;
 bool lKeyPressed = false;
+bool enterKeyPressed = false;
 
 void processSelected(GLFWwindow* window, std::vector<Object>& pawns) {
 	// find the index of the piece that is currently selected
@@ -115,17 +116,14 @@ void processSelected(GLFWwindow* window, std::vector<Object>& pawns) {
 	for (int i = 0; i < pawns.size(); i++) {
 		if (pawns[i].selected == 1.0) {
 			index = i;
-			std::cout << index << std::endl;
 		}
 	}
 	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS && !nKeyPressed) {			// select next pawn in array pawns and unselect the current pawn
 		pawns[index].selected = 0.0;
 		if (index < pawns.size()-1) {
-			std::cout << "N, if" << std::endl;
 			pawns[index + 1].selected = 1.0;
 		}
 		else {
-			std::cout << "N, else" << std::endl;
 			pawns[0].selected = 1.0;		// start from beginning or array
 		}
 		nKeyPressed = true;
@@ -468,9 +466,15 @@ int main(int argc, char* argv[])
 
 		
 		// render the pawns
-		std::cout << "Pawn ";
 		for (auto& pawn : pawns) {
-			std::cout<< pawn.selected<<" ";
+			// move selected piece on chessboard
+			if (pawn.selected == 1.0 && glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS && !enterKeyPressed) {
+				pawn.model = pawn.model + glm::translate(pawn.model, glm::vec3(0.0, 15.0, 0.0));
+				enterKeyPressed = true;
+			}
+			else if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE) {
+				enterKeyPressed = false; 
+			}
 			shader.use();
 			shader.setMatrix4("M", pawn.model);
 			shader.setMatrix4("itM", inverseModel);
@@ -481,7 +485,6 @@ int main(int argc, char* argv[])
 			glDepthFunc(GL_LEQUAL);
 			pawn.draw();
 		}
-		std::cout << std::endl;
 
 
 		// render the board
@@ -513,6 +516,9 @@ int main(int argc, char* argv[])
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
 		cubeMap.draw();
 		glDepthFunc(GL_LESS);
+
+
+
 
 		fps(now);
 		glfwSwapBuffers(window);
