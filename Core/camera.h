@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 #include <glad/glad.h>
+#include<iostream>
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
@@ -66,7 +67,7 @@ public:
         return glm::lookAt(this->Position, this->Position + this->Front, this->Up);     // lookAt function creates a matrix of camera view point wrt origin
     }
 
-    glm::mat4 GetProjectionMatrix(float fov=45.0, float ratio=1.0, float near=0.01, float far=100.0)
+    glm::mat4 GetProjectionMatrix(float fov=45, float ratio=1.0, float near=0.01, float far=100.0)
     {
         return glm::perspective(fov, ratio, near, far);     // generates a matrix with the properties of the camera, e.g. fov etc
     }
@@ -110,9 +111,24 @@ public:
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
     {
-        /* The motivated students can implement rotation using the mouse rather than the keyboard
-        * You can draw inspiration from the ProcessKeyboardMovement function
-        */
+        // code from https://learnopengl.com/Getting-started/Camera
+        xoffset *= MouseSensitivity;
+        yoffset *= MouseSensitivity;
+
+        Yaw += xoffset;
+        Pitch += yoffset;
+
+        // make sure that when pitch is out of bounds, screen doesn't get flipped
+        if (constrainPitch)
+        {
+            if (Pitch > 89.0f)
+                Pitch = 89.0f;
+            if (Pitch < -89.0f)
+                Pitch = -89.0f;
+        }
+
+        // update Front, Right and Up Vectors using the updated Euler angles
+        updateCameraVectors();
     }
 
     // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
