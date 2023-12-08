@@ -105,6 +105,50 @@ GLuint loadTexture(const char* path) {
 
 Camera camera(glm::vec3(0.0, 30.0, 60.0));
 
+// we need to make sure that the keys for selecting the pieces are only selected ones and not continuously:
+bool nKeyPressed = false;
+bool lKeyPressed = false;
+
+void processSelected(GLFWwindow* window, std::vector<Object>& pawns) {
+	// find the index of the piece that is currently selected
+	int index = 0;
+	for (int i = 0; i < pawns.size(); i++) {
+		if (pawns[i].selected == 1.0) {
+			index = i;
+			std::cout << index << std::endl;
+		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS && !nKeyPressed) {			// select next pawn in array pawns and unselect the current pawn
+		pawns[index].selected = 0.0;
+		if (index < pawns.size()-1) {
+			std::cout << "N, if" << std::endl;
+			pawns[index + 1].selected = 1.0;
+		}
+		else {
+			std::cout << "N, else" << std::endl;
+			pawns[0].selected = 1.0;		// start from beginning or array
+		}
+		nKeyPressed = true;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_N) == GLFW_RELEASE) {
+		nKeyPressed = false;  // Reset the n key
+	}
+	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS && !lKeyPressed) {			// select last pawn in array pawns and unselect the current pawn
+		pawns[index].selected = 0.0;
+		if (index > 0) {
+			pawns[index - 1].selected = 1.0;
+		}
+		else {
+			pawns[pawns.size() - 1].selected = 1.0;		// select the last piece in array
+		}
+		lKeyPressed = true;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_RELEASE) {
+		lKeyPressed = false;  // Reset the l key
+	}
+
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -164,6 +208,7 @@ int main(int argc, char* argv[])
 		"out vec3 v_frag_coord;"
 		"out vec3 v_normal;"
 		"out vec2 TexCoord; \n"
+		
 
 		"uniform mat4 M; \n"
 		"uniform mat4 itM; \n"
@@ -200,6 +245,7 @@ int main(int argc, char* argv[])
 		"float quadratic;\n"
 		"};\n"
 		"uniform Light light;"
+		"vec3 materialColour = vec3(1.0,0.0,0.0);"
 
 		"uniform float shininess; \n"
 
@@ -209,7 +255,8 @@ int main(int argc, char* argv[])
 		"float spec = pow(max(cosTheta,0.0), shininess); \n"
 		"return light.specular_strength * spec;\n"
 		"}\n"
-
+		
+		"uniform float selected;"
 		"in vec2 TexCoord; \n"
 		"uniform sampler2D ourTexture; \n"
 		"void main() { \n"
@@ -224,7 +271,9 @@ int main(int argc, char* argv[])
 		//"light = light.ambient_strength + attenuation * diffuse;"
 		//"float light = light.ambient_strength + attenuation * diffuse;\n"
 		//"FragColor = vec4(vec3(texture(ourTexture, TexCoord)) * vec3(light), 1.0); "
-		" FragColor = vec4(texture(ourTexture, TexCoord).xyz  * light, 1.0);"
+		"if(selected == 1.0) FragColor = vec4(texture(ourTexture, TexCoord).xyz * materialColour * vec3(light), 1.0);"	//todo: maybe use smoothstep to mix texture and color instead of multiplying it
+		"else if(selected == 0.0) FragColor = vec4(texture(ourTexture, TexCoord).xyz  * light, 1.0);"
+		//" FragColor = vec4(texture(ourTexture, TexCoord).xyz  * light, 1.0);"
 		//"FragColor = vec4(light.light_color, 1.0);"
 		//"FragColor = vec4(materialColour * vec3(light), 1.0); \n"
 		"} \n";
@@ -395,12 +444,15 @@ int main(int argc, char* argv[])
 		loadCubemapFace(pair.first.c_str(), pair.second);
 	}
 
+	// mark first pawn as selected
+	pawns[3].selected = 1.0;
 
 	glfwSwapInterval(1);
 	//Rendering
 
 	while (!glfwWindowShouldClose(window)) {
 		processInput(window);
+		processSelected(window, pawns);
 		view = camera.GetViewMatrix();
 		glfwPollEvents();
 		double now = glfwGetTime();
@@ -414,27 +466,34 @@ int main(int argc, char* argv[])
 		shader.setVector3f("light.light_color", light_col);
 		shader.setVector3f("u_view_pos", camera.Position);
 
-		// render the board
-		shader.setMatrix4("M", board.model);
-		shader.setMatrix4("itM", inverseModel);
-		shader.setInteger("ourTexture", 0);
-		// add texture to board
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glDepthFunc(GL_LEQUAL);
-		board.draw();
 		
 		// render the pawns
+		std::cout << "Pawn ";
 		for (auto& pawn : pawns) {
+			std::cout<< pawn.selected<<" ";
 			shader.use();
 			shader.setMatrix4("M", pawn.model);
 			shader.setMatrix4("itM", inverseModel);
 			shader.setInteger("ourTexture", 0);
+			shader.setFloat("selected", pawn.selected);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, texture_pawn);
 			glDepthFunc(GL_LEQUAL);
 			pawn.draw();
 		}
+		std::cout << std::endl;
+
+
+		// render the board
+		shader.setMatrix4("M", board.model);
+		shader.setMatrix4("itM", inverseModel);
+		shader.setInteger("ourTexture", 0);
+		shader.setFloat("selected", 0.0);		// we never want the board to be selected
+		// add texture to board
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glDepthFunc(GL_LEQUAL);
+		board.draw();
 		
 
 		// render the sphere

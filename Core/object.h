@@ -35,6 +35,8 @@ public:
 
 	glm::mat4 model = glm::mat4(1.0);
 
+	float selected = 0.0;
+
 
 	Object(const char* path) {
 
