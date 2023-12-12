@@ -17,26 +17,30 @@
 #include "shader.h"
 #include "object.h"
 
-
+// ######## Session Variables ############
 const int window_width = 800;
 const int window_height = 800;
-// for mouse_callback
-bool firstMouse = true;
-float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
+
+bool firstMouse = true; // for mouse_callback
+float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right, so we initially rotate a bit to the left.
 float pitch = 0.0f;
 float lastX = 800.0f / 2.0;
 float lastY = 600.0 / 2.0;
+
 float fov = 45.0f;
+// #######################################
+
+
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-
 GLuint compileShader(std::string shaderCode, GLenum shaderType);
 GLuint compileProgram(GLuint vertexShader, GLuint fragmentShader);
+
 void processInput(GLFWwindow* window);
 
-void loadCubemapFace(const char* file, const GLenum& targetCube);
+void loadCubemapFace(const char* path, const GLenum& targetFace);
 
 #ifndef NDEBUG
 void APIENTRY glDebugOutput(GLenum source,
@@ -157,7 +161,6 @@ void processSelected(GLFWwindow* window, std::vector<Object>& pawns) {
 
 }
 
-
 int main(int argc, char* argv[])
 {
 	std::cout << "Welcome to the demo by Igors and Veronika" << std::endl;
@@ -209,135 +212,25 @@ int main(int argc, char* argv[])
 	}
 #endif
 
-	const std::string sourceV = "#version 330 core\n"
-		// position, tex_coord and normals come from obj file and are progressed in object.h
-		"in vec3 position; \n"
-		"in vec2 tex_coord; \n"
-		"in vec3 normal;"
 
-		"out vec3 v_frag_coord;"
-		"out vec3 v_normal;"
-		"out vec2 TexCoord; \n"
-		
+// ######## Setup Generic Shaders ############
+    char Generic_Fragment_Shader_file[128] = PATH_TO_SHADERS"/Generic_Fragment_Shader.frag";
+    char Generic_Vertex_Shader_file[128] = PATH_TO_SHADERS"/Generic_Vertex_Shader.vert";
+    Shader Generic_Shader = Shader(Generic_Vertex_Shader_file, Generic_Fragment_Shader_file);
+// #####################################
 
-		"uniform mat4 M; \n"
-		"uniform mat4 itM; \n"
-		"uniform mat4 V; \n"
-		"uniform mat4 P; \n"
-
-		"void main(){ \n"
-		"vec4 frag_coord = M* vec4(position, 1.0);\n"
-		"gl_Position = P*V*M*vec4(position, 1);\n"
-		// transform the normals
-		"v_normal = vec3(itM * vec4(normal, 1.0));"
-		"v_frag_coord = frag_coord.xyz;"
-		"TexCoord = tex_coord; \n"
-		"}\n";
-	const std::string sourceF = "#version 330 core\n"
-		"out vec4 FragColor;"
-		"precision mediump float; \n"
-
-		"in vec3 v_frag_coord; \n"
-		"in vec3 v_normal; \n"
-
-		"uniform vec3 u_view_pos; \n"
-
-		// establish light
-		"struct Light{\n"
-		//"vec3 light_color;"
-		"vec3 light_pos; \n"
-		"float ambient_strength; \n"
-		"float diffuse_strength; \n"
-		"float specular_strength; \n"
-		//attenuation factor
-		"float constant;\n"
-		"float linear;\n"
-		"float quadratic;\n"
-		"};\n"
-		"uniform Light light;"
-		"vec3 materialColour = vec3(1.0,0.0,0.0);"
-
-		"uniform float shininess; \n"
-
-		"float specularCalculation(vec3 N, vec3 L, vec3 V ){ \n"
-		"vec3 R = reflect (-L,N);  \n " //reflect (-L,N) is  equivalent to //max (2 * dot(N,L) * N - L , 0.0) ;
-		"float cosTheta = dot(R , V); \n"
-		"float spec = pow(max(cosTheta,0.0), shininess); \n"
-		"return light.specular_strength * spec;\n"
-		"}\n"
-		
-		"uniform float selected;"
-		"in vec2 TexCoord; \n"
-		"uniform sampler2D ourTexture; \n"
-		"void main() { \n"
-		"vec3 N = normalize(v_normal);\n"
-		"vec3 L = normalize(light.light_pos - v_frag_coord) ; \n"
-		"vec3 V = normalize(u_view_pos - v_frag_coord); \n"
-		"float specular = specularCalculation( N, L, V); \n"
-		"float diffuse = light.diffuse_strength * max(dot(N,L),0.0);\n"
-		"float distance = length(light.light_pos - v_frag_coord);"
-		"float attenuation = 1 / (light.constant + light.linear * distance + light.quadratic * distance * distance);"
-		"float light = light.ambient_strength + attenuation * (diffuse + specular);  \n" // + attenuation * (diffuse + 0.0)
-		//"light = light.ambient_strength + attenuation * diffuse;"
-		//"float light = light.ambient_strength + attenuation * diffuse;\n"
-		//"FragColor = vec4(vec3(texture(ourTexture, TexCoord)) * vec3(light), 1.0); "
-		"if(selected == 1.0) FragColor = vec4(texture(ourTexture, TexCoord).xyz * materialColour * vec3(light), 1.0);"	//todo: maybe use smoothstep to mix texture and color instead of multiplying it
-		"else if(selected == 0.0) FragColor = vec4(texture(ourTexture, TexCoord).xyz  * light, 1.0);"
-		//" FragColor = vec4(texture(ourTexture, TexCoord).xyz  * light, 1.0);"
-		//"FragColor = vec4(light.light_color, 1.0);"
-		//"FragColor = vec4(materialColour * vec3(light), 1.0); \n"
-		"} \n";
-
-	// fragment shader for sphere
-	const std::string sourceF_sphere = "#version 330 core\n"
-		"out vec4 FragColor;"
-		"precision mediump float; \n"
-		//"in vec4 v_frag_coord; \n"
-		"void main() { \n"
-		"FragColor = vec4(vec3(1.0,0.0,0.0),1.0); \n"
-		"} \n";
+// ######## Setup Debug Sphere Shaders ############
+    char Debug_Sphere_Fragment_Shader_file[128] = PATH_TO_SHADERS"/Background_CubeMap_Vertex_Shader.vert";
+    char Debug_Sphere_Vertex_Shader_file[128] = PATH_TO_SHADERS"/Background_CubeMap_Fragment_Shader.frag";
+    Shader Debug_Sphere_Shader = Shader(Debug_Sphere_Vertex_Shader_file, Debug_Sphere_Fragment_Shader_file);
+// #####################################
 
 
-	char fileFrag[128] = PATH_TO_SHADERS"/FragmentShader.frag";
-	Shader shader(sourceV, sourceF);
-	Shader shader_sphere(sourceV, sourceF_sphere);
-
-	const std::string sourceVCubeMap = "#version 330 core\n"
-		"in vec3 position; \n"
-		"in vec2 tex_coords; \n"
-		"in vec3 normal; \n"
-
-		//only P and V are necessary
-		"uniform mat4 V; \n"
-		"uniform mat4 P; \n"
-
-		"out vec3 texCoord_v; \n"
-
-		" void main(){ \n"
-		"texCoord_v = position;\n"
-		//remove translation info from view matrix to only keep rotation
-		"mat4 V_no_rot = mat4(mat3(V)) ;\n"
-		"vec4 pos = P * V_no_rot * vec4(position, 1.0); \n"
-		// the positions xyz are divided by w after the vertex shader
-		// the z component is equal to the depth value
-		// we want a z always equal to 1.0 here, so we set z = w!
-		// Remember: z=1.0 is the MAXIMUM depth value ;)
-		"gl_Position = pos.xyww;\n"
-		"\n"
-		"}\n";
-
-	const std::string sourceFCubeMap =
-		"#version 330 core\n"
-		"out vec4 FragColor;\n"
-		"precision mediump float; \n"
-		"uniform samplerCube cubemapSampler; \n"
-		"in vec3 texCoord_v; \n"
-		"void main() { \n"
-		"FragColor = texture(cubemapSampler,texCoord_v); \n"
-		"} \n";
-
-
-	Shader cubeMapShader = Shader(sourceVCubeMap, sourceFCubeMap);
+// ######## Setup Background CubeMap Shaders ############
+    char Background_CubeMap_Vertex_Shader_file[128] = PATH_TO_SHADERS"/Background_CubeMap_Vertex_Shader.vert";
+    char Background_CubeMap_Fragment_Shader_file[128] = PATH_TO_SHADERS"/Background_CubeMap_Fragment_Shader.frag";
+	Shader cubeMapShader = Shader(Background_CubeMap_Vertex_Shader_file, Background_CubeMap_Fragment_Shader_file);
+// #####################################
 
 
 	double prev = 0;
@@ -361,7 +254,7 @@ int main(int argc, char* argv[])
 	GLuint texture = loadTexture(path_text);
 	char path[] = PATH_TO_OBJECTS"/ChessBoard.obj";
 	Object board(path);
-	board.makeObject(shader);
+	board.makeObject(Generic_Shader);
 
 	// load and arrange pawns
 	char path_text_pawn[] = PATH_TO_TEXTURE"/texPawn.jpg";
@@ -373,14 +266,14 @@ int main(int argc, char* argv[])
 		pawn.model = glm::scale(pawn.model, glm::vec3(0.3, 0.3, 0.3));
 		pawn.model = glm::rotate(pawn.model, (float)-3.14 / 2, glm::vec3(1.0f, 0.0f, 0.0f));
 		pawn.model = glm::translate(pawn.model, glm::vec3(5.0 + 7.5 * i, 8.0, 3.4));
-		pawn.makeObject(shader);
+		pawn.makeObject(Generic_Shader);
 		pawns.push_back(pawn);
 	}
 
 	// add a sphere in origin for reference
 	char path3[] = PATH_TO_OBJECTS"/sphere_smooth.obj";
 	Object sphere3(path3);
-	sphere3.makeObject(shader);
+	sphere3.makeObject(Generic_Shader);
 
 	// cubemap (background)
 	char pathCube[] = PATH_TO_OBJECTS"/cube.obj";
@@ -416,14 +309,14 @@ int main(int argc, char* argv[])
 	float specular = 0.4;
 	float shininess = 2.0;
 
-	shader.use();
-	shader.setFloat("shininess", shininess);
-	shader.setFloat("light.ambient_strength", ambient);
-	shader.setFloat("light.diffuse_strength", diffuse);
-	shader.setFloat("light.specular_strength", specular);
-	shader.setFloat("light.constant", 1.0);
-	shader.setFloat("light.linear", 0.14);
-	shader.setFloat("light.quadratic", 0.07);
+    Generic_Shader.use();
+    Generic_Shader.setFloat("shininess", shininess);
+    Generic_Shader.setFloat("light.ambient_strength", ambient);
+    Generic_Shader.setFloat("light.diffuse_strength", diffuse);
+    Generic_Shader.setFloat("light.specular_strength", specular);
+    Generic_Shader.setFloat("light.constant", 1.0);
+    Generic_Shader.setFloat("light.linear", 0.14);
+    Generic_Shader.setFloat("light.quadratic", 0.07);
 
 
 	// give texture to background (cubmap)
@@ -469,12 +362,12 @@ int main(int argc, char* argv[])
 		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// initialize rendering (send parameters to the shader)
-		shader.use();
-		shader.setMatrix4("V", view);
-		shader.setMatrix4("P", perspective);
-		shader.setVector3f("light.light_pos", light_pos);
-		shader.setVector3f("light.light_color", light_col);
-		shader.setVector3f("u_view_pos", camera.Position);
+        Generic_Shader.use();
+        Generic_Shader.setMatrix4("V", view);
+        Generic_Shader.setMatrix4("P", perspective);
+        Generic_Shader.setVector3f("light.light_pos", light_pos);
+        Generic_Shader.setVector3f("light.light_color", light_col);
+        Generic_Shader.setVector3f("u_view_pos", camera.Position);
 
 		
 		// render the pawns
@@ -487,11 +380,11 @@ int main(int argc, char* argv[])
 			else if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE) {
 				enterKeyPressed = false; 
 			}
-			shader.use();
-			shader.setMatrix4("M", pawn.model);
-			shader.setMatrix4("itM", inverseModel);
-			shader.setInteger("ourTexture", 0);
-			shader.setFloat("selected", pawn.selected);
+            Generic_Shader.use();
+            Generic_Shader.setMatrix4("M", pawn.model);
+            Generic_Shader.setMatrix4("itM", inverseModel);
+            Generic_Shader.setInteger("ourTexture", 0);
+            Generic_Shader.setFloat("selected", pawn.selected);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, texture_pawn);
 			glDepthFunc(GL_LEQUAL);
@@ -500,10 +393,10 @@ int main(int argc, char* argv[])
 
 
 		// render the board
-		shader.setMatrix4("M", board.model);
-		shader.setMatrix4("itM", inverseModel);
-		shader.setInteger("ourTexture", 0);
-		shader.setFloat("selected", 0.0);		// we never want the board to be selected
+        Generic_Shader.setMatrix4("M", board.model);
+        Generic_Shader.setMatrix4("itM", inverseModel);
+        Generic_Shader.setInteger("ourTexture", 0);
+        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
 		// add texture to board
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
@@ -512,11 +405,11 @@ int main(int argc, char* argv[])
 		
 
 		// render the sphere
-		shader_sphere.use();
-		shader_sphere.setMatrix4("V", view);
-		shader_sphere.setMatrix4("P", perspective);
-		shader_sphere.setMatrix4("itM", inverseModel);
-		shader_sphere.setMatrix4("M", sphere3.model);
+        Debug_Sphere_Shader.use();
+        Debug_Sphere_Shader.setMatrix4("V", view);
+        Debug_Sphere_Shader.setMatrix4("P", perspective);
+        Debug_Sphere_Shader.setMatrix4("itM", inverseModel);
+        Debug_Sphere_Shader.setMatrix4("M", sphere3.model);
 		sphere3.draw();
 
 		// render the cubemap
