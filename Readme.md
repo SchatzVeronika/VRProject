@@ -1,6 +1,6 @@
 # Delegating tasks:
 ## Veronika:
-Geometry shader explosion of a selected pawn
+- [ ] Geometry shader explosion of a selected pawn
 - [ ] Ray tracing effects
 - [ ] Pawn selection and movement
 - [ ] Game logic
