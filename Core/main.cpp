@@ -217,22 +217,23 @@ int main(int argc, char* argv[])
     char Generic_Fragment_Shader_file[128] = PATH_TO_SHADERS"/Generic_Fragment_Shader.frag";
     char Generic_Vertex_Shader_file[128] = PATH_TO_SHADERS"/Generic_Vertex_Shader.vert";
     Shader Generic_Shader = Shader(Generic_Vertex_Shader_file, Generic_Fragment_Shader_file);
-// #####################################
+// ###########################################
 
 // ######## Setup Debug Sphere Shaders ############
-    char Debug_Sphere_Fragment_Shader_file[128] = PATH_TO_SHADERS"/Background_CubeMap_Vertex_Shader.vert";
-    char Debug_Sphere_Vertex_Shader_file[128] = PATH_TO_SHADERS"/Background_CubeMap_Fragment_Shader.frag";
-    Shader Debug_Sphere_Shader = Shader(Debug_Sphere_Vertex_Shader_file, Debug_Sphere_Fragment_Shader_file);
-// #####################################
+//    char Debug_Sphere_Fragment_Shader_file[128] = PATH_TO_SHADERS"/Debug_Sphere_Fragment_Shader.frag";
+//    char Debug_Sphere_Vertex_Shader_file[128] = PATH_TO_SHADERS"/Debug_Sphere_Vertex_Shader.vert";
+//    Shader Debug_Sphere_Shader = Shader(Debug_Sphere_Vertex_Shader_file, Debug_Sphere_Fragment_Shader_file);
+// ###########################################
 
 
 // ######## Setup Background CubeMap Shaders ############
     char Background_CubeMap_Vertex_Shader_file[128] = PATH_TO_SHADERS"/Background_CubeMap_Vertex_Shader.vert";
     char Background_CubeMap_Fragment_Shader_file[128] = PATH_TO_SHADERS"/Background_CubeMap_Fragment_Shader.frag";
 	Shader cubeMapShader = Shader(Background_CubeMap_Vertex_Shader_file, Background_CubeMap_Fragment_Shader_file);
-// #####################################
+// ###########################################
 
 
+// ######## FPS Counter #######################
 	double prev = 0;
 	int deltaFrame = 0;
 	//fps function
@@ -246,15 +247,82 @@ int main(int argc, char* argv[])
 			std::cout << "\r FPS: " << fpsCount;
 		}
 		};
+// ###########################################
 
 
-	// loading the objects:
-	// board
-	char path_text[] = PATH_TO_TEXTURE"/textureChessBoard.JPG";
-	GLuint texture = loadTexture(path_text);
-	char path[] = PATH_TO_OBJECTS"/ChessBoard.obj";
-	Object board(path);
-	board.makeObject(Generic_Shader);
+// ######## Objects #######################
+// Chess Board Chopped
+
+	char path_Board_Texture[] = PATH_TO_TEXTURE"/textureChessBoard.JPG";
+    GLuint texture = loadTexture(path_Board_Texture);
+
+
+	char path_Board_0x_0y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_0x_0y.obj";
+	Object Board_0x_0y(path_Board_0x_0y);
+    Board_0x_0y.makeObject(Generic_Shader);
+
+    char path_Board_0x_2y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_0x_2y.obj";
+    Object Board_0x_2y(path_Board_0x_2y);
+    Board_0x_2y.makeObject(Generic_Shader);
+
+    char path_Board_0x_4y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_0x_4y.obj";
+    Object Board_0x_4y(path_Board_0x_4y);
+    Board_0x_4y.makeObject(Generic_Shader);
+
+    char path_Board_0x_6y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_0x_6y.obj";
+    Object Board_0x_6y(path_Board_0x_6y);
+    Board_0x_6y.makeObject(Generic_Shader);
+
+    char path_Board_2x_0y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_2x_0y.obj";
+    Object Board_2x_0y(path_Board_2x_0y);
+    Board_2x_0y.makeObject(Generic_Shader);
+
+    char path_Board_2x_2y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_2x_2y.obj";
+    Object Board_2x_2y(path_Board_2x_2y);
+    Board_2x_2y.makeObject(Generic_Shader);
+
+    char path_Board_2x_4y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_2x_4y.obj";
+    Object Board_2x_4y(path_Board_2x_4y);
+    Board_2x_4y.makeObject(Generic_Shader);
+
+    char path_Board_2x_6y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_2x_6y.obj";
+    Object Board_2x_6y(path_Board_2x_6y);
+    Board_2x_6y.makeObject(Generic_Shader);
+
+    char path_Board_4x_0y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_4x_0y.obj";
+    Object Board_4x_0y(path_Board_4x_0y);
+    Board_4x_0y.makeObject(Generic_Shader);
+
+    char path_Board_4x_2y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_4x_2y.obj";
+    Object Board_4x_2y(path_Board_4x_2y);
+    Board_4x_2y.makeObject(Generic_Shader);
+
+    char path_Board_4x_4y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_4x_4y.obj";
+    Object Board_4x_4y(path_Board_4x_4y);
+    Board_4x_4y.makeObject(Generic_Shader);
+
+    char path_Board_4x_6y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_4x_6y.obj";
+    Object Board_4x_6y(path_Board_4x_6y);
+    Board_4x_6y.makeObject(Generic_Shader);
+
+    char path_Board_6x_0y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_6x_0y.obj";
+    Object Board_6x_0y(path_Board_6x_0y);
+    Board_6x_0y.makeObject(Generic_Shader);
+
+    char path_Board_6x_2y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_6x_2y.obj";
+    Object Board_6x_2y(path_Board_6x_2y);
+    Board_6x_2y.makeObject(Generic_Shader);
+
+    char path_Board_6x_4y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_6x_4y.obj";
+    Object Board_6x_4y(path_Board_6x_4y);
+    Board_6x_4y.makeObject(Generic_Shader);
+
+    char path_Board_6x_6y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_6x_6y.obj";
+    Object Board_6x_6y(path_Board_6x_6y);
+    Board_6x_6y.makeObject(Generic_Shader);
+
+
+
 
 	// load and arrange pawns
 	char path_text_pawn[] = PATH_TO_TEXTURE"/texPawn.jpg";
@@ -288,10 +356,16 @@ int main(int argc, char* argv[])
 
 	// board
 	glm::mat4 model = glm::mat4(1.0);
-	//model = glm::translate(model, glm::vec3(0.0, 0.0, -10.0));
-	board.model = glm::scale(board.model, glm::vec3(0.5, 0.5, 0.5));
-	board.model = glm::rotate(board.model, (float)-3.14 / 2, glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::translate(model, glm::vec3(0.0, 0.0, -10.0));
+    //Board_0x_0y.model = glm::scale(Board_0x_0y.model, glm::vec3(0.5, 0.5, 0.5));
+    Board_0x_0y.model = glm::rotate(Board_0x_0y.model, (float)-3.14 / 2, glm::vec3(1.0f, 0.0f, 0.0f));
 	glm::mat4 inverseModel = glm::transpose(glm::inverse(model));
+
+    //glm::mat4 model2 = glm::mat4(1.0);
+    Board_0x_2y.model = glm::translate(Board_0x_2y.model, glm::vec3(0.0, 0.0, -10.0));
+    //Board_0x_2y.model = glm::scale(Board_0x_2y.model, glm::vec3(0.5, 0.5, 0.5));
+    Board_0x_2y.model = glm::rotate(Board_0x_2y.model, (float)-3.14 / 2, glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::mat4 inverseModel2 = glm::transpose(glm::inverse(model));
 
 
 
@@ -393,7 +467,7 @@ int main(int argc, char* argv[])
 
 
 		// render the board
-        Generic_Shader.setMatrix4("M", board.model);
+        Generic_Shader.setMatrix4("M", Board_0x_0y.model);
         Generic_Shader.setMatrix4("itM", inverseModel);
         Generic_Shader.setInteger("ourTexture", 0);
         Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
@@ -401,16 +475,26 @@ int main(int argc, char* argv[])
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glDepthFunc(GL_LEQUAL);
-		board.draw();
+        Board_0x_0y.draw();
+
+        Generic_Shader.setMatrix4("M", Board_0x_2y.model);
+        Generic_Shader.setMatrix4("itM", inverseModel2);
+        Generic_Shader.setInteger("ourTexture", 0);
+        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
+        // add texture to board
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glDepthFunc(GL_LEQUAL);
+        Board_0x_2y.draw();
 		
 
 		// render the sphere
-        Debug_Sphere_Shader.use();
-        Debug_Sphere_Shader.setMatrix4("V", view);
-        Debug_Sphere_Shader.setMatrix4("P", perspective);
-        Debug_Sphere_Shader.setMatrix4("itM", inverseModel);
-        Debug_Sphere_Shader.setMatrix4("M", sphere3.model);
-		sphere3.draw();
+//        Debug_Sphere_Shader.use();
+//        Debug_Sphere_Shader.setMatrix4("V", view);
+//        Debug_Sphere_Shader.setMatrix4("P", perspective);
+//        Debug_Sphere_Shader.setMatrix4("itM", inverseModel);
+//        Debug_Sphere_Shader.setMatrix4("M", sphere3.model);
+//		sphere3.draw();
 
 		// render the cubemap
 		cubeMapShader.use();
