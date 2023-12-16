@@ -28,17 +28,20 @@ float lastX = 800.0f / 2.0;
 float lastY = 600.0 / 2.0;
 
 float fov = 45.0f;
+
+bool isCursorCaptured = true; // Initially capture the cursor
 // #######################################
 
 
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 GLuint compileShader(std::string shaderCode, GLenum shaderType);
 GLuint compileProgram(GLuint vertexShader, GLuint fragmentShader);
 
-void processInput(GLFWwindow* window);
+void processKeyboardCameraInput(GLFWwindow* window);
 
 void loadCubemapFace(const char* path, const GLenum& targetFace);
 
@@ -431,12 +434,14 @@ int main(int argc, char* argv[])
 	//Rendering
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetKeyCallback(window, key_callback);
 
 	while (!glfwWindowShouldClose(window)) {
-		processInput(window);
+        processKeyboardCameraInput(window);
 		processSelected(window, pawns);
 		view = camera.GetViewMatrix();
 		glfwPollEvents();
+        glfwSetKeyCallback(window, key_callback); //Lookout for ALT keypress
 		double now = glfwGetTime();
 		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -684,7 +689,7 @@ void loadCubemapFace(const char* path, const GLenum& targetFace)
 	stbi_image_free(data);
 }
 
-void processInput(GLFWwindow* window) {
+void processKeyboardCameraInput(GLFWwindow* window) {
 	// Use the cameras class to change the parameters of the camera
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
@@ -729,6 +734,19 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
     lastY = ypos;
 
     camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+//Catch ALT being pressed on the keyboard, to show the cursor again
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_LEFT_ALT && action == GLFW_PRESS) {
+        isCursorCaptured = !isCursorCaptured;
+
+        if (isCursorCaptured) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        } else {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+    }
 }
 
 //taken from https://learnopengl.com/Getting-started/Camera
