@@ -430,6 +430,8 @@ int main(int argc, char* argv[])
 	glfwSwapInterval(1);
 	//Rendering
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	while (!glfwWindowShouldClose(window)) {
 		processInput(window);
 		processSelected(window, pawns);
@@ -710,13 +712,11 @@ void processInput(GLFWwindow* window) {
 
 
 //taken from https://learnopengl.com/Getting-started/Camera
-void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
-{
-	float xpos = static_cast<float>(xposIn);
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
+    float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
 
-    if (firstMouse)
-    {
+    if (firstMouse) {
         lastX = xpos;
         lastY = ypos;
         firstMouse = false;
