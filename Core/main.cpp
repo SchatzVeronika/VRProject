@@ -17,6 +17,9 @@
 #include "shader.h"
 #include "object.h"
 
+
+
+
 // ######## Session Variables ############
 const int window_width = 800;
 const int window_height = 800;
@@ -166,6 +169,7 @@ void processSelected(GLFWwindow* window, std::vector<Object>& pawns) {
 
 int main(int argc, char* argv[])
 {
+	//btDefaultCollisionConfiguration collisionConfig;
 	std::cout << "Welcome to the demo by Igors and Veronika" << std::endl;
 
 	//Boilerplate
@@ -433,7 +437,7 @@ int main(int argc, char* argv[])
 	glfwSwapInterval(1);
 	//Rendering
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetKeyCallback(window, key_callback);
 
 	while (!glfwWindowShouldClose(window)) {
