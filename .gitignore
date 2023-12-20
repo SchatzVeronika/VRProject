@@ -35,5 +35,3 @@ CMakeSettings.json
 *.exe
 *.out
 *.app
-
-3rdParty/

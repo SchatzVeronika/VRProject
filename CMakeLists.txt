@@ -16,12 +16,13 @@ target_include_directories(glad PUBLIC ${GLAD_INCLUDE})
 
 #for bullet library
 add_subdirectory("3rdParty/bullet3-3.25")
-set(BULLET_SOURCE_DIR "3rdParty/bullet3-3.25/src")
-file(GLOB_RECURSE BULLET_SOURCE_FILES ${BULLET_SOURCE_DIR}/*.cpp)
-add_library(bullet3-3.25 STATIC ${BULLET_SOURCE_FILES})
-target_include_directories(bullet3-3.25 PUBLIC ${BULLET_SOURCE_DIR})
+
+#set(BULLET_SOURCE_DIR "3rdParty/bullet3-3.25/src")
+#file(GLOB_RECURSE BULLET_SOURCE_FILES ${BULLET_SOURCE_DIR}/*.cpp)
+#add_library(bullet3-3.25 STATIC ${BULLET_SOURCE_FILES})
+#target_include_directories(bullet3-3.25 PUBLIC ${BULLET_SOURCE_DIR})
 #target_include_directories(bullet3-3.25 PRIVATE ${OpenCL_INCLUDE_DIRS})
-include_directories("3rdParty/bullet3-3.25/src")
+#include_directories("3rdParty/bullet3-3.25/src")
 
 #add_subdirectory("3rdParty/bullet3-3.25")
 

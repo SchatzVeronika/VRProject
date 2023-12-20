@@ -16,6 +16,10 @@
 #include "camera.h"
 #include "shader.h"
 #include "object.h"
+#include "btBulletDynamicsCommon.h"
+#include "btBulletCollisionCommon.h"
+
+
 
 
 
