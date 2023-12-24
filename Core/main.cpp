@@ -127,21 +127,21 @@ bool nKeyPressed = false;
 bool lKeyPressed = false;
 bool enterKeyPressed = false;
 
-void processSelected(GLFWwindow* window, std::vector<Object>& pawns) {
+void processSelected(GLFWwindow* window, std::vector<Object>& object) {
 	// find the index of the piece that is currently selected
 	int index = 0;
-	for (int i = 0; i < pawns.size(); i++) {
-		if (pawns[i].selected == 1.0) {
+	for (int i = 0; i < object.size(); i++) {
+		if (object[i].selected == 1.0) {
 			index = i;
 		}
 	}
 	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS && !nKeyPressed) {			// select next pawn in array pawns and unselect the current pawn
-		pawns[index].selected = 0.0;
-		if (index < pawns.size()-1) {
-			pawns[index + 1].selected = 1.0;
+		object[index].selected = 0.0;
+		if (index < object.size()-1) {
+			object[index + 1].selected = 1.0;
 		}
 		else {
-			pawns[0].selected = 1.0;		// start from beginning or array
+			object[0].selected = 1.0;		// start from beginning or array
 		}
 		nKeyPressed = true;
 	}
@@ -149,12 +149,12 @@ void processSelected(GLFWwindow* window, std::vector<Object>& pawns) {
 		nKeyPressed = false;  // Reset the n key
 	}
 	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS && !lKeyPressed) {			// select last pawn in array pawns and unselect the current pawn
-		pawns[index].selected = 0.0;
+		object[index].selected = 0.0;
 		if (index > 0) {
-			pawns[index - 1].selected = 1.0;
+			object[index - 1].selected = 1.0;
 		}
 		else {
-			pawns[pawns.size() - 1].selected = 1.0;		// select the last piece in array
+			object[object.size() - 1].selected = 1.0;		// select the last piece in array
 		}
 		lKeyPressed = true;
 	}
@@ -257,78 +257,26 @@ int main(int argc, char* argv[])
 // Chess Board Chopped
 
     //texture
+
+	
+	std::vector<std::vector<Object>> board;		// 2Dvector for all fields
 	char path_Board_Colour_1[] = PATH_TO_TEXTURE"/Checkers_Board/Board_Colour_1.png";
-    GLuint Board_Texture_1 = loadTexture(path_Board_Colour_1);
+	GLuint Board_Texture_1 = loadTexture(path_Board_Colour_1);
 
-    char path_Board_Colour_2[] = PATH_TO_TEXTURE"/Checkers_Board/Board_Colour_2.png";
-    GLuint Board_Texture_2 = loadTexture(path_Board_Colour_2);
+	char path_Board_Colour_2[] = PATH_TO_TEXTURE"/Checkers_Board/Board_Colour_2.png";
+	GLuint Board_Texture_2 = loadTexture(path_Board_Colour_2);
 
-
-	char path_Board_0x_0y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_0x_0y.obj";
-	Object Board_0x_0y(path_Board_0x_0y);
-    Board_0x_0y.makeObject(Generic_Shader);
-
-    char path_Board_0x_2y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_0x_2y.obj";
-    Object Board_0x_2y(path_Board_0x_2y);
-    Board_0x_2y.makeObject(Generic_Shader);
-
-    char path_Board_0x_4y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_0x_4y.obj";
-    Object Board_0x_4y(path_Board_0x_4y);
-    Board_0x_4y.makeObject(Generic_Shader);
-
-    char path_Board_0x_6y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_0x_6y.obj";
-    Object Board_0x_6y(path_Board_0x_6y);
-    Board_0x_6y.makeObject(Generic_Shader);
-
-    char path_Board_2x_0y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_2x_0y.obj";
-    Object Board_2x_0y(path_Board_2x_0y);
-    Board_2x_0y.makeObject(Generic_Shader);
-
-    char path_Board_2x_2y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_2x_2y.obj";
-    Object Board_2x_2y(path_Board_2x_2y);
-    Board_2x_2y.makeObject(Generic_Shader);
-
-    char path_Board_2x_4y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_2x_4y.obj";
-    Object Board_2x_4y(path_Board_2x_4y);
-    Board_2x_4y.makeObject(Generic_Shader);
-
-    char path_Board_2x_6y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_2x_6y.obj";
-    Object Board_2x_6y(path_Board_2x_6y);
-    Board_2x_6y.makeObject(Generic_Shader);
-
-    char path_Board_4x_0y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_4x_0y.obj";
-    Object Board_4x_0y(path_Board_4x_0y);
-    Board_4x_0y.makeObject(Generic_Shader);
-
-    char path_Board_4x_2y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_4x_2y.obj";
-    Object Board_4x_2y(path_Board_4x_2y);
-    Board_4x_2y.makeObject(Generic_Shader);
-
-    char path_Board_4x_4y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_4x_4y.obj";
-    Object Board_4x_4y(path_Board_4x_4y);
-    Board_4x_4y.makeObject(Generic_Shader);
-
-    char path_Board_4x_6y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_4x_6y.obj";
-    Object Board_4x_6y(path_Board_4x_6y);
-    Board_4x_6y.makeObject(Generic_Shader);
-
-    char path_Board_6x_0y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_6x_0y.obj";
-    Object Board_6x_0y(path_Board_6x_0y);
-    Board_6x_0y.makeObject(Generic_Shader);
-
-    char path_Board_6x_2y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_6x_2y.obj";
-    Object Board_6x_2y(path_Board_6x_2y);
-    Board_6x_2y.makeObject(Generic_Shader);
-
-    char path_Board_6x_4y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_6x_4y.obj";
-    Object Board_6x_4y(path_Board_6x_4y);
-    Board_6x_4y.makeObject(Generic_Shader);
-
-    char path_Board_6x_6y[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_6x_6y.obj";
-    Object Board_6x_6y(path_Board_6x_6y);
-    Board_6x_6y.makeObject(Generic_Shader);
-
-
+	char pathBoard[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_0x_0y.obj";
+	for (int i = 0; i < 4; i++) {
+		std::vector<Object> row;
+		for (int j = 0; j < 4; j++) {
+			Object field(pathBoard);
+			field.model = glm::translate(field.model, glm::vec3(2.0 * i, 0.0, 2.0 * j));
+			field.makeObject(Generic_Shader);
+			row.push_back(field);
+		}
+		board.push_back(row);
+	}
 
 	// load and arrange pawns
 	char path_text_pawn[] = PATH_TO_TEXTURE"/texPawn.jpg";
@@ -359,21 +307,6 @@ int main(int argc, char* argv[])
 	// sphere
 	sphere3.model = glm::translate(sphere3.model, glm::vec3(0.0, 0.0, 0.0));
 	sphere3.model = glm::scale(sphere3.model, glm::vec3(1.5, 1.5, 1.5));
-
-	// board
-	//glm::mat4 model = glm::mat4(1.0);
-	//model = glm::translate(model, glm::vec3(0.0, 0.0, -10.0));
-    //Board_0x_0y.model = glm::scale(Board_0x_0y.model, glm::vec3(0.5, 0.5, 0.5));
-    //Board_0x_0y.model = glm::rotate(Board_0x_0y.model, (float)-3.14 / 2, glm::vec3(1.0f, 0.0f, 0.0f));
-	//glm::mat4 inverseModel = glm::transpose(glm::inverse(model));
-
-    //glm::mat4 model2 = glm::mat4(1.0);
-    //Board_0x_2y.model = glm::translate(Board_0x_2y.model, glm::vec3(0.0, 0.0, -10.0));
-    //Board_0x_2y.model = glm::scale(Board_0x_2y.model, glm::vec3(0.5, 0.5, 0.5));
-    //Board_0x_2y.model = glm::rotate(Board_0x_2y.model, (float)-3.14 / 2, glm::vec3(1.0f, 0.0f, 0.0f));
-    //glm::mat4 inverseModel2 = glm::transpose(glm::inverse(model));
-
-
 
 	// camera variables:
 	glm::mat4 view = camera.GetViewMatrix();
@@ -430,6 +363,9 @@ int main(int argc, char* argv[])
 	// mark first pawn as selected
 	pawns[3].selected = 1.0;
 
+	// mark first white field as selected;
+	board[0][0].selected = 1.0;
+
 	glfwSwapInterval(1);
 	//Rendering
 
@@ -475,176 +411,20 @@ int main(int argc, char* argv[])
 			pawn.draw();
 		}
 
-
 		// render the board
-        Generic_Shader.setMatrix4("M", Board_0x_0y.model);
-        //Generic_Shader.setMatrix4("itM", inverseModel);
-        Generic_Shader.setInteger("ourTexture", 0);
-        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
-		// add texture to board
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, Board_Texture_1);
-		glDepthFunc(GL_LEQUAL);
-        Board_0x_0y.draw();
-
-        Generic_Shader.setMatrix4("M", Board_0x_2y.model);
-        //Generic_Shader.setMatrix4("itM", inverseModel2);
-        Generic_Shader.setInteger("ourTexture", 0);
-        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
-        // add texture to board
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Board_Texture_2);
-        glDepthFunc(GL_LEQUAL);
-        Board_0x_2y.draw();
-
-        Generic_Shader.setMatrix4("M", Board_0x_4y.model);
-        //Generic_Shader.setMatrix4("itM", inverseModel2);
-        Generic_Shader.setInteger("ourTexture", 0);
-        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
-        // add texture to board
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Board_Texture_1);
-        glDepthFunc(GL_LEQUAL);
-        Board_0x_4y.draw();
-
-        Generic_Shader.setMatrix4("M", Board_0x_6y.model);
-        //Generic_Shader.setMatrix4("itM", inverseModel2);
-        Generic_Shader.setInteger("ourTexture", 0);
-        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
-        // add texture to board
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Board_Texture_2);
-        glDepthFunc(GL_LEQUAL);
-        Board_0x_6y.draw();
-
-        Generic_Shader.setMatrix4("M", Board_2x_0y.model);
-        //Generic_Shader.setMatrix4("itM", inverseModel2);
-        Generic_Shader.setInteger("ourTexture", 0);
-        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
-        // add texture to board
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Board_Texture_2);
-        glDepthFunc(GL_LEQUAL);
-        Board_2x_0y.draw();
-
-        Generic_Shader.setMatrix4("M", Board_2x_2y.model);
-        //Generic_Shader.setMatrix4("itM", inverseModel2);
-        Generic_Shader.setInteger("ourTexture", 0);
-        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
-        // add texture to board
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Board_Texture_1);
-        glDepthFunc(GL_LEQUAL);
-        Board_2x_2y.draw();
-
-        Generic_Shader.setMatrix4("M", Board_2x_4y.model);
-        //Generic_Shader.setMatrix4("itM", inverseModel2);
-        Generic_Shader.setInteger("ourTexture", 0);
-        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
-        // add texture to board
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Board_Texture_2);
-        glDepthFunc(GL_LEQUAL);
-        Board_2x_4y.draw();
-
-        Generic_Shader.setMatrix4("M", Board_2x_6y.model);
-        //Generic_Shader.setMatrix4("itM", inverseModel2);
-        Generic_Shader.setInteger("ourTexture", 0);
-        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
-        // add texture to board
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Board_Texture_1);
-        glDepthFunc(GL_LEQUAL);
-        Board_2x_6y.draw();
-
-        Generic_Shader.setMatrix4("M", Board_4x_0y.model);
-        //Generic_Shader.setMatrix4("itM", inverseModel2);
-        Generic_Shader.setInteger("ourTexture", 0);
-        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
-        // add texture to board
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Board_Texture_1);
-        glDepthFunc(GL_LEQUAL);
-        Board_4x_0y.draw();
-
-        Generic_Shader.setMatrix4("M", Board_4x_2y.model);
-        //Generic_Shader.setMatrix4("itM", inverseModel2);
-        Generic_Shader.setInteger("ourTexture", 0);
-        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
-        // add texture to board
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Board_Texture_2);
-        glDepthFunc(GL_LEQUAL);
-        Board_4x_2y.draw();
-
-        Generic_Shader.setMatrix4("M", Board_4x_4y.model);
-        //Generic_Shader.setMatrix4("itM", inverseModel2);
-        Generic_Shader.setInteger("ourTexture", 0);
-        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
-        // add texture to board
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Board_Texture_1);
-        glDepthFunc(GL_LEQUAL);
-        Board_4x_4y.draw();
-
-        Generic_Shader.setMatrix4("M", Board_4x_6y.model);
-        //Generic_Shader.setMatrix4("itM", inverseModel2);
-        Generic_Shader.setInteger("ourTexture", 0);
-        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
-        // add texture to board
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Board_Texture_2);
-        glDepthFunc(GL_LEQUAL);
-        Board_4x_6y.draw();
-
-        Generic_Shader.setMatrix4("M", Board_6x_0y.model);
-        //Generic_Shader.setMatrix4("itM", inverseModel2);
-        Generic_Shader.setInteger("ourTexture", 0);
-        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
-        // add texture to board
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Board_Texture_2);
-        glDepthFunc(GL_LEQUAL);
-        Board_6x_0y.draw();
-
-        Generic_Shader.setMatrix4("M", Board_6x_2y.model);
-        //Generic_Shader.setMatrix4("itM", inverseModel2);
-        Generic_Shader.setInteger("ourTexture", 0);
-        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
-        // add texture to board
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Board_Texture_1);
-        glDepthFunc(GL_LEQUAL);
-        Board_6x_2y.draw();
-
-        Generic_Shader.setMatrix4("M", Board_6x_4y.model);
-        //Generic_Shader.setMatrix4("itM", inverseModel2);
-        Generic_Shader.setInteger("ourTexture", 0);
-        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
-        // add texture to board
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Board_Texture_2);
-        glDepthFunc(GL_LEQUAL);
-        Board_6x_4y.draw();
-
-        Generic_Shader.setMatrix4("M", Board_6x_6y.model);
-        //Generic_Shader.setMatrix4("itM", inverseModel2);
-        Generic_Shader.setInteger("ourTexture", 0);
-        Generic_Shader.setFloat("selected", 0.0);		// we never want the board to be selected
-        // add texture to board
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Board_Texture_1);
-        glDepthFunc(GL_LEQUAL);
-        Board_6x_6y.draw();
-		
-
-		// render the sphere
-//        Debug_Sphere_Shader.use();
-//        Debug_Sphere_Shader.setMatrix4("V", view);
-//        Debug_Sphere_Shader.setMatrix4("P", perspective);
-//        Debug_Sphere_Shader.setMatrix4("itM", inverseModel);
-//        Debug_Sphere_Shader.setMatrix4("M", sphere3.model);
-//		sphere3.draw();
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				Generic_Shader.use();
+				Generic_Shader.setMatrix4("M", board[i][j].model);
+				Generic_Shader.setInteger("ourTexture", 0);
+				Generic_Shader.setFloat("selected", board[i][j].selected);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, Board_Texture_1);
+				if ((i+j) % 2 == 0) { glBindTexture(GL_TEXTURE_2D, Board_Texture_2); }
+				glDepthFunc(GL_LEQUAL);
+				board[i][j].draw();
+			}
+		}
 
 		// render the cubemap
 		cubeMapShader.use();
