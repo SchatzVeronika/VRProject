@@ -2,7 +2,7 @@
 ## Veronika:
 - [ ] Geometry shader explosion of a selected pawn
 - [ ] Ray tracing effects
-- [ ] Pawn selection and movement
+- [x] Pawn selection and movement
 - [ ] Game logic
 - [ ] Better lightning
 

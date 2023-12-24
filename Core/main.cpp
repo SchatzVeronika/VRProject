@@ -127,6 +127,7 @@ bool nKeyPressed = false;
 bool lKeyPressed = false;
 bool fKeyPressed = false;
 bool enterKeyPressed = false;
+bool alternate = false;
 
 void processSelected(GLFWwindow* window, std::vector<Object>& object) {
 	// find the index of the piece that is currently selected
@@ -179,41 +180,37 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 		}
 	}
 	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !fKeyPressed) {			// select next field in array board and unselect the current field
-		std::cout << "F key pressed" << std::endl;
+		std::cout << index_i << std::endl;
+		std::cout << index_j << std::endl;
 		board[index_i][index_j].selected = 0.0;
 		bool new_selected = false;
-		if (index_i < board.size() - 1) {				// iterate through rows of board
-			std::cout << "index_i < board.size() - 1)" << std::endl;
-			board[index_i + 1][index_j].selected = 1.0;
+		if (index_i < board.size() - 2) {				// iterate through rows of board
+			board[index_i + 2][index_j].selected = 1.0;		// we have to increase the index by 2 to jump over the black fields
 			new_selected = true;
 		}
 		else if (index_j < board.size() - 1 && new_selected == false) {											// iterate through columns of board
-			board[0][index_j+1].selected = 1.0;
+			if (alternate == false) {		// check if new field is white
+				board[1][index_j + 1].selected = 1.0;
+				std::cout << "alternatef" << std::endl;
+				alternate = true;
+			}else { 
+				std::cout << "alternatet" << std::endl;
+				board[0][index_j + 1].selected = 1.0; 
+				alternate = false;
+			}
 			new_selected = true;
 
 		}
-		else if (index_i == board.size() - 1 && new_selected == false) {		// begin from first field
+		else if (index_i == board.size() - 1.0 && new_selected == false) {		// begin from first field
 			board[0][0].selected = 1.0;
 			new_selected = true;
+			alternate = false;
 		}
 		fKeyPressed = true;
 	}
 	else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE) {
 		fKeyPressed = false;  // Reset the n key
 	}
-	/*if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS && !lKeyPressed) {			// select last pawn in array pawns and unselect the current pawn
-		object[index].selected = 0.0;
-		if (index > 0) {
-			object[index - 1].selected = 1.0;
-		}
-		else {
-			object[object.size() - 1].selected = 1.0;		// select the last piece in array
-		}
-		lKeyPressed = true;
-	}
-	else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_RELEASE) {
-		lKeyPressed = false;  // Reset the l key
-	}*/
 
 }
 
