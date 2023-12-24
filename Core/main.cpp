@@ -125,6 +125,7 @@ Camera camera(glm::vec3(0.0, 30.0, 60.0));
 // we need to make sure that the keys for selecting the pieces are only selected ones and not continuously:
 bool nKeyPressed = false;
 bool lKeyPressed = false;
+bool fKeyPressed = false;
 bool enterKeyPressed = false;
 
 void processSelected(GLFWwindow* window, std::vector<Object>& object) {
@@ -137,7 +138,7 @@ void processSelected(GLFWwindow* window, std::vector<Object>& object) {
 	}
 	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS && !nKeyPressed) {			// select next pawn in array pawns and unselect the current pawn
 		object[index].selected = 0.0;
-		if (index < object.size()-1) {
+		if (index < object.size() - 1) {
 			object[index + 1].selected = 1.0;
 		}
 		else {
@@ -161,6 +162,58 @@ void processSelected(GLFWwindow* window, std::vector<Object>& object) {
 	else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_RELEASE) {
 		lKeyPressed = false;  // Reset the l key
 	}
+
+}
+
+void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& board) {
+	// find the index of the field that is currently selected
+	int index_i = 0;
+	int index_j = 0;
+	for (int i = 0; i < board.size(); i++) {
+		for (int j = 0; j < board[i].size(); j++) {
+			if (board[i][j].selected == 1.0) {
+				index_i = i;
+				index_j = j;
+
+			}
+		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !fKeyPressed) {			// select next field in array board and unselect the current field
+		std::cout << "F key pressed" << std::endl;
+		board[index_i][index_j].selected = 0.0;
+		bool new_selected = false;
+		if (index_i < board.size() - 1) {				// iterate through rows of board
+			std::cout << "index_i < board.size() - 1)" << std::endl;
+			board[index_i + 1][index_j].selected = 1.0;
+			new_selected = true;
+		}
+		else if (index_j < board.size() - 1 && new_selected == false) {											// iterate through columns of board
+			board[0][index_j+1].selected = 1.0;
+			new_selected = true;
+
+		}
+		else if (index_i == board.size() - 1 && new_selected == false) {		// begin from first field
+			board[0][0].selected = 1.0;
+			new_selected = true;
+		}
+		fKeyPressed = true;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE) {
+		fKeyPressed = false;  // Reset the n key
+	}
+	/*if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS && !lKeyPressed) {			// select last pawn in array pawns and unselect the current pawn
+		object[index].selected = 0.0;
+		if (index > 0) {
+			object[index - 1].selected = 1.0;
+		}
+		else {
+			object[object.size() - 1].selected = 1.0;		// select the last piece in array
+		}
+		lKeyPressed = true;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_RELEASE) {
+		lKeyPressed = false;  // Reset the l key
+	}*/
 
 }
 
@@ -364,6 +417,12 @@ int main(int argc, char* argv[])
 	pawns[3].selected = 1.0;
 
 	// mark first white field as selected;
+	std::vector<Object> white_fields;		// array with all white fields -> only ones that figure can move to
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			if ((i + j) % 2 == 0) white_fields.push_back(board[i][j]);
+		}
+	}
 	board[0][0].selected = 1.0;
 
 	glfwSwapInterval(1);
@@ -375,6 +434,7 @@ int main(int argc, char* argv[])
 	while (!glfwWindowShouldClose(window)) {
         processKeyboardCameraInput(window);
 		processSelected(window, pawns);
+		processSelectedField(window, board);
 		view = camera.GetViewMatrix();
 		glfwPollEvents();
         glfwSetKeyCallback(window, key_callback); //Lookout for ALT keypress
@@ -419,8 +479,7 @@ int main(int argc, char* argv[])
 				Generic_Shader.setInteger("ourTexture", 0);
 				Generic_Shader.setFloat("selected", board[i][j].selected);
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, Board_Texture_1);
-				if ((i+j) % 2 == 0) { glBindTexture(GL_TEXTURE_2D, Board_Texture_2); }
+				if ((i+j) % 2 == 0) { glBindTexture(GL_TEXTURE_2D, Board_Texture_1); } else { glBindTexture(GL_TEXTURE_2D, Board_Texture_2); }
 				glDepthFunc(GL_LEQUAL);
 				board[i][j].draw();
 			}
