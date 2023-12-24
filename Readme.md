@@ -16,3 +16,13 @@
 ## Extra
 - [ ] Reflective/Refractive objects
 - [ ] Compute shaders
+
+
+## Key Inputs
+L and N: iterate through the pawns
+F: iterate through white fields on board
+A: camera moves to left
+D: camera moves to right
+W: camera moves forwards
+S: camera moves backwards
+arrows: camera rotation

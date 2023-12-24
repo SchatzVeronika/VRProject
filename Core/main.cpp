@@ -414,12 +414,6 @@ int main(int argc, char* argv[])
 	pawns[3].selected = 1.0;
 
 	// mark first white field as selected;
-	std::vector<Object> white_fields;		// array with all white fields -> only ones that figure can move to
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			if ((i + j) % 2 == 0) white_fields.push_back(board[i][j]);
-		}
-	}
 	board[0][0].selected = 1.0;
 
 	glfwSwapInterval(1);
