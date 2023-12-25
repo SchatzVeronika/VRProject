@@ -26,3 +26,6 @@ D: camera moves to right
 W: camera moves forwards
 S: camera moves backwards
 arrows: camera rotation
+
+## Camera controls
+By default, the camera is locked inside the render window. To unlock the camera, for example, to close the window, press L ALT.
