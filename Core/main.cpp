@@ -226,16 +226,15 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 }
 
 
-void translateMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std::vector<Object>& pawns) {
-	int index_i = getSelectedCube(board).first;
-	int index_j = getSelectedCube(board).second;
-	int index_pawn = getSelectedPawn(pawns);
-	//std::cout << "test translateMeeple" << std::endl;
+void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std::vector<Object>& meeples) {
+	int board_i = getSelectedCube(board).first;
+	int board_j = getSelectedCube(board).second;
+	int index_pawn = getSelectedPawn(meeples);
 
 	// get position of selected cube
-	glm::vec3 cube_pos = board[index_i][index_j].getPos();
-	//pawns[0].model = glm::translate(pawns[0].model, glm::vec3(cube_pos.x, cube_pos.y, cube_pos.z));
-
+	glm::vec3 cube_pos = board[board_i][board_j].getPos();
+	meeples[index_pawn].position = glm::vec3(cube_pos.x, cube_pos.y + 1.2, cube_pos.z);
+	meeples[index_pawn].model = glm::translate(glm::mat4(1.0f), meeples[index_pawn].position);
 
 }
 
@@ -465,11 +464,12 @@ int main(int argc, char* argv[])
 
 
 	// arrange meeples onto black cubes for initial set up
-	int index_i = getSelectedCube(board).first;
+	/*int index_i = getSelectedCube(board).first;
 	int index_j = getSelectedCube(board).second;
 	glm::vec3 cube_pos = board[index_i][index_j].getPos();
 	meeples[0].position = glm::vec3(cube_pos.x, cube_pos.y + 1.2, cube_pos.z);
 	meeples[0].model = glm::translate(glm::mat4(1.0f), meeples[0].position);
+	*/
 
 
 	// place first half of meeples on one side of the board
@@ -552,13 +552,21 @@ int main(int argc, char* argv[])
 		//processSelected(window, pawns);
 		processSelected(window, meeples);
 		processSelectedField(window, board);
-		//translateMeeple(window, board, pawns);
 		view = camera.GetViewMatrix();
 		glfwPollEvents();
         glfwSetKeyCallback(window, key_callback); //Lookout for ALT keypress
 		double now = glfwGetTime();
 		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// Enter moves meeples to selected cube
+		if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS && !enterKeyPressed) {
+			moveMeeple(window, board, meeples);
+			enterKeyPressed = true;
+		}
+		else if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE) {
+			enterKeyPressed = false;
+		}
 		// initialize rendering (send parameters to the shader)
         Generic_Shader.use();
         Generic_Shader.setMatrix4("V", view);
@@ -568,13 +576,6 @@ int main(int argc, char* argv[])
         Generic_Shader.setVector3f("u_view_pos", camera.Position);
 
 		for (auto& meeple : meeples) {
-			if (meeple.selected == 1.0 && glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS && !enterKeyPressed) {
-				meeple.model = meeple.model + glm::translate(meeple.model, glm::vec3(1.0, 0.0, 0.0));
-				enterKeyPressed = true;
-			}
-			else if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE) {
-				enterKeyPressed = false;
-			}
 			Generic_Shader.use();
 			Generic_Shader.setMatrix4("M", meeple.model);
 			//Generic_Shader.setMatrix4("itM", inverseModel);

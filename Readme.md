@@ -14,6 +14,7 @@
 - [ ] Mouse scrolling
 
 ## Extra
+- [ ] Different texture for meeples (two colored)
 - [ ] Reflective/Refractive objects
 - [ ] Compute shaders
 
