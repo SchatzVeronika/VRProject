@@ -36,6 +36,7 @@ public:
 	glm::mat4 model = glm::mat4(1.0);
 
 	float selected = 0.0;
+	std::string color;
 
 
 	Object(const char* path) {
@@ -139,7 +140,9 @@ public:
 		numVertices = vertices.size();
 	}
 
-
+	glm::vec3 getPos() {
+		return glm::vec3(model[3]);
+	}
 
 	void makeObject(Shader shader, bool texture = true) {
 

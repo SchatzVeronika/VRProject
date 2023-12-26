@@ -180,36 +180,30 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 		}
 	}
 	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !fKeyPressed) {			// select next field in array board and unselect the current field
-		std::cout << index_i << std::endl;
-		std::cout << index_j << std::endl;
 		board[index_i][index_j].selected = 0.0;
-		bool new_selected = false;
-		if (index_i < board.size() - 2) {				// iterate through rows of board
-			board[index_i + 2][index_j].selected = 1.0;		// we have to increase the index by 2 to jump over the black fields
-			new_selected = true;
-		}
-		else if (index_j < board.size() - 1 && new_selected == false) {											// iterate through columns of board
-			if (alternate == false) {		// check if new field is white
-				board[1][index_j + 1].selected = 1.0;
-				std::cout << "alternatef" << std::endl;
-				alternate = true;
-			}else { 
-				std::cout << "alternatet" << std::endl;
-				board[0][index_j + 1].selected = 1.0; 
-				alternate = false;
-			}
-			new_selected = true;
+		int next_i = index_i;
+		int next_j = index_j;
 
-		}
-		else if (index_i == board.size() - 1.0 && new_selected == false) {		// begin from first field
-			board[0][0].selected = 1.0;
-			new_selected = true;
-			alternate = false;
-		}
+		do {
+			if (next_i < board[next_j].size() - 1) {
+				next_i += 1;		
+			}	
+			else {	
+				next_i = 0;		
+				next_j++;	
+			}	
+
+			if (next_j >= board.size()) {	
+				next_j = 0;	
+			}	
+
+		} while (board[next_i][next_j].color != "black");	// find the next black field in the array board
+
+		board[next_i][next_j].selected = 1.0;	
 		fKeyPressed = true;
 	}
 	else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE) {
-		fKeyPressed = false;  // Reset the n key
+		fKeyPressed = false;  // Reset the f key
 	}
 
 }
@@ -413,8 +407,12 @@ int main(int argc, char* argv[])
 	// mark first pawn as selected
 	pawns[3].selected = 1.0;
 
-	// mark first white field as selected;
-	board[0][0].selected = 1.0;
+	// mark first dark field as selected;
+	board[1][0].selected = 1.0;
+
+	glm::vec3 test = board[0][0].getPos();
+
+	std::cout << test.x << test.y << test.z << std::endl;
 
 	glfwSwapInterval(1);
 	//Rendering
@@ -470,7 +468,13 @@ int main(int argc, char* argv[])
 				Generic_Shader.setInteger("ourTexture", 0);
 				Generic_Shader.setFloat("selected", board[i][j].selected);
 				glActiveTexture(GL_TEXTURE0);
-				if ((i+j) % 2 == 0) { glBindTexture(GL_TEXTURE_2D, Board_Texture_1); } else { glBindTexture(GL_TEXTURE_2D, Board_Texture_2); }
+				if ((i + j) % 2 == 0) { 
+					glBindTexture(GL_TEXTURE_2D, Board_Texture_1); 
+					board[i][j].color = "white"; 
+				}
+				else { 
+					glBindTexture(GL_TEXTURE_2D, Board_Texture_2); board[i][j].color = "black";
+				}
 				glDepthFunc(GL_LEQUAL);
 				board[i][j].draw();
 			}
