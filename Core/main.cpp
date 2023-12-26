@@ -298,9 +298,9 @@ int main(int argc, char* argv[])
 // ###########################################
 
 // ######## Setup Debug Sphere Shaders ############
-//    char Debug_Sphere_Fragment_Shader_file[128] = PATH_TO_SHADERS"/Debug_Sphere_Fragment_Shader.frag";
-//    char Debug_Sphere_Vertex_Shader_file[128] = PATH_TO_SHADERS"/Debug_Sphere_Vertex_Shader.vert";
-//    Shader Debug_Sphere_Shader = Shader(Debug_Sphere_Vertex_Shader_file, Debug_Sphere_Fragment_Shader_file);
+    char Debug_Sphere_Fragment_Shader_file[128] = PATH_TO_SHADERS"/Debug_Sphere_Fragment_Shader.frag";
+    char Debug_Sphere_Vertex_Shader_file[128] = PATH_TO_SHADERS"/Debug_Sphere_Vertex_Shader.vert";
+    Shader Debug_Sphere_Shader = Shader(Debug_Sphere_Vertex_Shader_file, Debug_Sphere_Fragment_Shader_file);
 // ###########################################
 
 
@@ -349,6 +349,10 @@ int main(int argc, char* argv[])
 			field.position = glm::vec3(2.0 * i, 0.0, 2.0 * j);
 			field.model = glm::translate(field.model, field.position);
 			field.makeObject(Generic_Shader);
+			if ((i + j) % 2 == 0) {
+				field.color = "white";
+			}
+			else { field.color = "black"; }
 			row.push_back(field);
 		}
 		board.push_back(row);
@@ -358,7 +362,7 @@ int main(int argc, char* argv[])
 	char path_text_pawn[] = PATH_TO_TEXTURE"/texPawn.jpg";
 	GLuint texture_pawn = loadTexture(path_text_pawn);
 	char pathPawn[] = PATH_TO_OBJECTS"/pawn.obj";
-	std::vector<Object> pawns;
+	/*std::vector<Object> pawns;
 	for (int i = 0; i < 4; i++) {
 		Object pawn(pathPawn);
 		pawn.model = glm::scale(pawn.model, glm::vec3(0.3, 0.3, 0.3));
@@ -367,6 +371,18 @@ int main(int argc, char* argv[])
 		pawn.makeObject(Generic_Shader);
 		pawns.push_back(pawn);
 	}
+	*/
+
+	// load and arrange meeples
+	char path_meeple[] = PATH_TO_OBJECTS"/meeple.obj";
+	std::vector<Object> meeples;
+	for (int i = 0; i < 4; i++) {
+		Object meeple(path_meeple);
+		meeple.model = glm::translate(meeple.model, glm::vec3(2.0*i, 2.0, 2.0));
+		meeple.makeObject(Generic_Shader);
+		meeples.push_back(meeple);
+	}
+	//meeple.model = glm::scale(meeple.model, glm::vec3(1.5, 1.5, 1.5));
 
 	// add a sphere in origin for reference
 	char path3[] = PATH_TO_OBJECTS"/sphere_smooth.obj";
@@ -437,7 +453,8 @@ int main(int argc, char* argv[])
 	}
 
 	// mark first pawn as selected
-	pawns[3].selected = 1.0;
+	//pawns[3].selected = 1.0;
+	meeples[3].selected = 1.0;
 
 	// mark first dark field as selected;
 	board[1][0].selected = 1.0;
@@ -445,6 +462,51 @@ int main(int argc, char* argv[])
 	glm::vec3 test = board[0][0].getPos();
 
 	//std::cout << test.x << test.y << test.z << std::endl;
+
+
+	// arrange meeples onto black cubes for initial set up
+	int index_i = getSelectedCube(board).first;
+	int index_j = getSelectedCube(board).second;
+	glm::vec3 cube_pos = board[index_i][index_j].getPos();
+	meeples[0].position = glm::vec3(cube_pos.x, cube_pos.y + 1.2, cube_pos.z);
+	meeples[0].model = glm::translate(glm::mat4(1.0f), meeples[0].position);
+
+
+	// place first half of meeples on one side of the board
+	int i_meeple = 0;
+	for (int i = 0; i < board.size(); i++) {
+		for (int j = 0; j < board[i].size(); j++) {
+			if (i_meeple == meeples.size()/2.0) {
+				break;
+			}
+			if (board[j][i].color == "black") {
+				glm::vec3 cube_pos = board[j][i].getPos();
+				meeples[i_meeple].position = glm::vec3(cube_pos.x, cube_pos.y + 1.2, cube_pos.z);
+				meeples[i_meeple].model = glm::translate(glm::mat4(1.0f), meeples[i_meeple].position);
+				i_meeple += 1;
+
+			}
+		}
+	}
+
+	// place second half meeples on one side of the board
+	i_meeple = meeples.size() / 2.0;
+	for (int i = board.size()-1; i >= 0; i--) {
+		for (int j = board[i].size()-1; j >= 0; j--) {
+			if (i_meeple == meeples.size()) {
+				break;
+			}
+			if (board[j][i].color == "black") {
+				std::cout << i <<j << std::endl;
+				glm::vec3 cube_pos = board[j][i].getPos();
+				meeples[i_meeple].position = glm::vec3(cube_pos.x, cube_pos.y + 1.2, cube_pos.z);
+				meeples[i_meeple].model = glm::translate(glm::mat4(1.0f), meeples[i_meeple].position);
+				i_meeple += 1;
+
+			}
+		}
+	}
+	
 
 	// initialize first set up of pawns:
 	/*pawns[0].model = glm::mat4(1.0f);
@@ -487,7 +549,8 @@ int main(int argc, char* argv[])
 
 	while (!glfwWindowShouldClose(window)) {
         processKeyboardCameraInput(window);
-		processSelected(window, pawns);
+		//processSelected(window, pawns);
+		processSelected(window, meeples);
 		processSelectedField(window, board);
 		//translateMeeple(window, board, pawns);
 		view = camera.GetViewMatrix();
@@ -504,9 +567,28 @@ int main(int argc, char* argv[])
         Generic_Shader.setVector3f("light.light_color", light_col);
         Generic_Shader.setVector3f("u_view_pos", camera.Position);
 
+		for (auto& meeple : meeples) {
+			if (meeple.selected == 1.0 && glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS && !enterKeyPressed) {
+				meeple.model = meeple.model + glm::translate(meeple.model, glm::vec3(1.0, 0.0, 0.0));
+				enterKeyPressed = true;
+			}
+			else if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE) {
+				enterKeyPressed = false;
+			}
+			Generic_Shader.use();
+			Generic_Shader.setMatrix4("M", meeple.model);
+			//Generic_Shader.setMatrix4("itM", inverseModel);
+			Generic_Shader.setInteger("ourTexture", 0);
+			Generic_Shader.setFloat("selected", meeple.selected);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture_pawn);
+			glDepthFunc(GL_LEQUAL);
+			meeple.draw();
+		}
+
 		
 		// render the pawns
-		for (auto& pawn : pawns) {
+		/*for (auto& pawn : pawns) {
 			// move selected piece on chessboard
 			if (pawn.selected == 1.0 && glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS && !enterKeyPressed) {
 				pawn.model = pawn.model + glm::translate(pawn.model, glm::vec3(0.0, 15.0, 0.0));
@@ -525,6 +607,7 @@ int main(int argc, char* argv[])
 			glDepthFunc(GL_LEQUAL);
 			pawn.draw();
 		}
+		*/
 
 		// render the board
 		for (int i = 0; i < 4; i++) {
@@ -534,12 +617,11 @@ int main(int argc, char* argv[])
 				Generic_Shader.setInteger("ourTexture", 0);
 				Generic_Shader.setFloat("selected", board[i][j].selected);
 				glActiveTexture(GL_TEXTURE0);
-				if ((i + j) % 2 == 0) { 
+				if (board[i][j].color == "white") {
 					glBindTexture(GL_TEXTURE_2D, Board_Texture_1); 
-					board[i][j].color = "white"; 
 				}
 				else { 
-					glBindTexture(GL_TEXTURE_2D, Board_Texture_2); board[i][j].color = "black";
+					glBindTexture(GL_TEXTURE_2D, Board_Texture_2);
 				}
 				glDepthFunc(GL_LEQUAL);
 				board[i][j].draw();
@@ -556,8 +638,11 @@ int main(int argc, char* argv[])
 		cubeMap.draw();
 		glDepthFunc(GL_LESS);
 
-
-
+		Debug_Sphere_Shader.use();
+		Debug_Sphere_Shader.setMatrix4("V", view);
+		Debug_Sphere_Shader.setMatrix4("P", perspective);
+		Debug_Sphere_Shader.setMatrix4("M", sphere3.model);
+		//sphere3.draw();
 
 		fps(now);
 		glfwSwapBuffers(window);
