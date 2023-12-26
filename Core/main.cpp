@@ -129,6 +129,33 @@ bool fKeyPressed = false;
 bool enterKeyPressed = false;
 bool alternate = false;
 
+std::pair<int, int> getSelectedCube(std::vector<std::vector<Object>>& board) {
+	// find the index of the field that is currently selected
+	int index_i = 0;
+	int index_j = 0;
+	for (int i = 0; i < board.size(); i++) {
+		for (int j = 0; j < board[i].size(); j++) {
+			if (board[i][j].selected == 1.0) {
+				index_i = i;
+				index_j = j;
+
+			}
+		}
+	}
+	return std::make_pair(index_i, index_j);
+}
+
+int getSelectedPawn(std::vector<Object>& pawns) {
+	int index = 0;
+	for (int i = 0; i < pawns.size(); i++) {
+		if (pawns[i].selected == 1.0) {
+			index = i;
+		}
+	}
+	return index;
+}
+
+
 void processSelected(GLFWwindow* window, std::vector<Object>& object) {
 	// find the index of the piece that is currently selected
 	int index = 0;
@@ -168,17 +195,8 @@ void processSelected(GLFWwindow* window, std::vector<Object>& object) {
 
 void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& board) {
 	// find the index of the field that is currently selected
-	int index_i = 0;
-	int index_j = 0;
-	for (int i = 0; i < board.size(); i++) {
-		for (int j = 0; j < board[i].size(); j++) {
-			if (board[i][j].selected == 1.0) {
-				index_i = i;
-				index_j = j;
-
-			}
-		}
-	}
+	int index_i = getSelectedCube(board).first;
+	int index_j = getSelectedCube(board).second;
 	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !fKeyPressed) {			// select next field in array board and unselect the current field
 		board[index_i][index_j].selected = 0.0;
 		int next_i = index_i;
@@ -205,6 +223,19 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 	else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE) {
 		fKeyPressed = false;  // Reset the f key
 	}
+}
+
+
+void translateMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std::vector<Object>& pawns) {
+	int index_i = getSelectedCube(board).first;
+	int index_j = getSelectedCube(board).second;
+	int index_pawn = getSelectedPawn(pawns);
+	//std::cout << "test translateMeeple" << std::endl;
+
+	// get position of selected cube
+	glm::vec3 cube_pos = board[index_i][index_j].getPos();
+	//pawns[0].model = glm::translate(pawns[0].model, glm::vec3(cube_pos.x, cube_pos.y, cube_pos.z));
+
 
 }
 
@@ -315,7 +346,8 @@ int main(int argc, char* argv[])
 		std::vector<Object> row;
 		for (int j = 0; j < 4; j++) {
 			Object field(pathBoard);
-			field.model = glm::translate(field.model, glm::vec3(2.0 * i, 0.0, 2.0 * j));
+			field.position = glm::vec3(2.0 * i, 0.0, 2.0 * j);
+			field.model = glm::translate(field.model, field.position);
 			field.makeObject(Generic_Shader);
 			row.push_back(field);
 		}
@@ -412,11 +444,44 @@ int main(int argc, char* argv[])
 
 	glm::vec3 test = board[0][0].getPos();
 
-	std::cout << test.x << test.y << test.z << std::endl;
+	//std::cout << test.x << test.y << test.z << std::endl;
+
+	// initialize first set up of pawns:
+	/*pawns[0].model = glm::mat4(1.0f);
+	board[1][0].model = glm::mat4(1.0f);
+	glm::vec3 cube_pos = board[1][0].getPos();
+	glm::vec3 pawn_pos = pawns[0].getPos();
+	// get position of cube and pawn without translations
+	std::cout << "before translation" << std::endl;
+	std::cout << cube_pos.x << cube_pos.y << cube_pos.z << std::endl;
+	std::cout << pawn_pos.x << pawn_pos.y << pawn_pos.z << std::endl;
+	//translate pawn and cube by 1.0
+	pawns[0].model = glm::translate(pawns[0].model, glm::vec3(1.0,1.0,1.0));
+	board[1][0].model = glm::translate(board[1][0].model, glm::vec3(1.0, 1.0, 1.0));
+	cube_pos = board[1][0].getPos();
+	pawn_pos = pawns[0].getPos();
+	std::cout << "after translation" << std::endl;
+	std::cout << cube_pos.x << cube_pos.y << cube_pos.z << std::endl;
+	std::cout << pawn_pos.x << pawn_pos.y << pawn_pos.z << std::endl;
+
+
+	int index_i = getSelectedCube(board).first;
+	int index_j = getSelectedCube(board).second;
+	cube_pos = board[index_i][index_j].getPos();
+	pawn_pos = pawns[0].getPos();
+	pawns[0].position = glm::vec3(cube_pos.x, cube_pos.y, cube_pos.z);
+	glm::vec3 pawn_pos_new = pawns[0].getPos();
+	pawns[0].model = glm::mat4(1.0f);
+	pawns[0].model = glm::translate(pawns[0].model, glm::vec3(cube_pos.x* -1.07374e+08, cube_pos.y * -1.07374e+08, cube_pos.z * -1.07374e+08));
+	//glm::vec3 pawn_pos_new = pawns[0].getPos();
+	//std::cout << cube_pos.x << cube_pos.y << cube_pos.z << std::endl;
+	//std::cout << pawn_pos.x << pawn_pos.y << pawn_pos.z << std::endl;
+	//std::cout << pawn_pos_new.x << pawn_pos_new.y << pawn_pos_new.z << std::endl;
+	*/
+
 
 	glfwSwapInterval(1);
 	//Rendering
-
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetKeyCallback(window, key_callback);
 
@@ -424,6 +489,7 @@ int main(int argc, char* argv[])
         processKeyboardCameraInput(window);
 		processSelected(window, pawns);
 		processSelectedField(window, board);
+		//translateMeeple(window, board, pawns);
 		view = camera.GetViewMatrix();
 		glfwPollEvents();
         glfwSetKeyCallback(window, key_callback); //Lookout for ALT keypress

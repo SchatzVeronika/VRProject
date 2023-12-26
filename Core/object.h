@@ -38,6 +38,10 @@ public:
 	float selected = 0.0;
 	std::string color;
 
+	glm::vec3 position;
+
+	Object(glm::vec3 Position) : position(Position){}		// to set a new position in main: objectxy.posiiton = glm::vec3(xpos,ypos,zpos);
+
 
 	Object(const char* path) {
 
@@ -141,7 +145,7 @@ public:
 	}
 
 	glm::vec3 getPos() {
-		return glm::vec3(model[3]);
+		return position;//glm::vec3(model[3]);
 	}
 
 	void makeObject(Shader shader, bool texture = true) {
