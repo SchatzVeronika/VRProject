@@ -229,7 +229,8 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 		}
 	}
 	/*std::cout << "current row" << current_row << std::endl;
-	std::cout << "next row" << next_row[0] << std::endl;
+	std::cout << "next row0" << next_row[0] << std::endl;
+	std::cout << "next row1" << next_row[1] << std::endl;
 	std::cout << "current column"<< current_column << std::endl;
 	std::cout << "next column"<< next_column << std::endl;*/
 	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !fKeyPressed) {			// select next field in array board and unselect the current field
@@ -237,25 +238,44 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 		int next_i = index_i;
 		std::cout << "irow" << i_row << std::endl;
 
-		if (i_row < next_row.size()-1) {
+		if (next_row[0] >= 0 && next_row[0] < board.size() && next_row[1] >= 0 && next_row[1] < board.size()) {		// check if both indices of next_row are inside the bounds of the board
+			i_row = (i_row + 1) % 2;	// alternate between the two indices
+			board[next_row[i_row]][next_column].selected = 1.0;
+			std::cout << "both" << std::endl;
+		}
+		else if (next_row[0] >= 0 && next_row[0] < board.size()) {		// if only one index is within the bounds of the board array
+			std::cout << "only index0" << std::endl;
+			i_row = next_row[0];
+			board[i_row][next_column].selected = 1.0;
+		}
+		else if (next_row[1] >= 0 && next_row[1] < board.size()) {		// if only one index is within the bounds of the board array
+			std::cout << "only index1" << std::endl;
+			i_row = next_row[1];
+			board[i_row][next_column].selected = 1.0;
+		}
+
+		/*if (i_row < next_row.size() - 1 && next_row[i_row] >= 0 && next_row[i_row] < board.size()) {
 			board[next_row[i_row]][next_column].selected = 1.0;
 			//std::cout << next_row.size() << std::endl;
-			i_row += 1;
+			
 		}
-		else {
+		/*else if (i_row >= next_row.size() - 1) {
 			board[next_row[i_row]][next_column].selected = 1.0;
 			std::cout << "test2" << std::endl;
 			i_row = 0;
-		}
+		}*/
+		//else if (next_row[i_row] < 0) {	// array out of bounds
+		//	i_row = 0;
+		//}
 
 		/*
 		do {
 			if (next_i < board[next_row].size() - 1) {	// iterate through black fields of row
 				next_i += 1;
-			}	
-			else {	
-				next_i = 0;		// start iteration through same row again	
-			}		
+			}
+			else {
+				next_i = 0;		// start iteration through same row again
+			}
 
 		} while (board[next_i][next_row].color != "black");	// find the next black field in the array board
 
