@@ -26,6 +26,7 @@ float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 re
 float pitch = 0.0f;
 float lastX = 800.0f / 2.0;
 float lastY = 600.0 / 2.0;
+int i_row = 0;
 
 float fov = 45.0f;
 
@@ -193,31 +194,73 @@ void processSelected(GLFWwindow* window, std::vector<Object>& object) {
 
 }
 
-void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& board) {
+void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& board, std::vector<Object>& meeples) {
 	// find the index of the field that is currently selected
 	int index_i = getSelectedCube(board).first;
 	int index_j = getSelectedCube(board).second;
+	// find the position of meeple that is currently selected
+	int i_selectedMeeple = getSelectedPawn(meeples);
+	//std::cout << i_selectedMeeple << std::endl;
+	glm::vec3 selectdMeeple_pos = meeples[i_selectedMeeple].getPos();
+	selectdMeeple_pos.y=0;		// compensate for translation of meeples wrt the board in y direction
+	//std::cout << selectdMeeple_pos.x << selectdMeeple_pos.y << selectdMeeple_pos.z << std::endl;
+	// find cube that corresponds to the position of the selected meeple
+	int current_row = 0;
+	int current_column = 0;
+	std::vector<int> next_row = { 0, 0 };
+	int next_column = 0;
+	bool flag = false;
+	for (int row = 0; row < board.size(); row++) {
+		for (int column = 0; column < board[row].size(); column++) {
+			if (board[row][column].position == selectdMeeple_pos) {
+				//std::cout << row << std::endl;
+				//std::cout << board[row][column].position.x << board[row][column].position.y << board[row][column].position.z << std::endl;
+				current_row = row;
+				current_column = column;
+				flag = true;
+				break;
+			}
+		}
+		if (flag) {
+			next_row[0] = current_row + 1;	// the fields that can be selected for the selected meeple are one row in front of the selected meeple (meeples can only move forward)
+			next_row[1] = current_row - 1;
+			next_column = current_column + 1;
+			break;
+		}
+	}
+	/*std::cout << "current row" << current_row << std::endl;
+	std::cout << "next row" << next_row[0] << std::endl;
+	std::cout << "current column"<< current_column << std::endl;
+	std::cout << "next column"<< next_column << std::endl;*/
 	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !fKeyPressed) {			// select next field in array board and unselect the current field
 		board[index_i][index_j].selected = 0.0;
 		int next_i = index_i;
-		int next_j = index_j;
+		std::cout << "irow" << i_row << std::endl;
 
+		if (i_row < next_row.size()-1) {
+			board[next_row[i_row]][next_column].selected = 1.0;
+			//std::cout << next_row.size() << std::endl;
+			i_row += 1;
+		}
+		else {
+			board[next_row[i_row]][next_column].selected = 1.0;
+			std::cout << "test2" << std::endl;
+			i_row = 0;
+		}
+
+		/*
 		do {
-			if (next_i < board[next_j].size() - 1) {
-				next_i += 1;		
+			if (next_i < board[next_row].size() - 1) {	// iterate through black fields of row
+				next_i += 1;
 			}	
 			else {	
-				next_i = 0;		
-				next_j++;	
-			}	
+				next_i = 0;		// start iteration through same row again	
+			}		
 
-			if (next_j >= board.size()) {	
-				next_j = 0;	
-			}	
+		} while (board[next_i][next_row].color != "black");	// find the next black field in the array board
 
-		} while (board[next_i][next_j].color != "black");	// find the next black field in the array board
-
-		board[next_i][next_j].selected = 1.0;	
+		board[next_i][next_row].selected = 1.0;
+		*/
 		fKeyPressed = true;
 	}
 	else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE) {
@@ -233,8 +276,8 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
 
 	// get position of selected cube
 	glm::vec3 cube_pos = board[board_i][board_j].getPos();
-	meeples[index_pawn].position = glm::vec3(cube_pos.x, cube_pos.y + 1.2, cube_pos.z);
-	meeples[index_pawn].model = glm::translate(glm::mat4(1.0f), meeples[index_pawn].position);
+	meeples[index_pawn].position = glm::vec3(cube_pos.x, cube_pos.y + 1.2, cube_pos.z);	// update position of meeple
+	meeples[index_pawn].model = glm::translate(glm::mat4(1.0f), meeples[index_pawn].position);		// move meeple to the new position
 
 }
 
@@ -345,7 +388,7 @@ int main(int argc, char* argv[])
 		std::vector<Object> row;
 		for (int j = 0; j < 4; j++) {
 			Object field(pathBoard);
-			field.position = glm::vec3(2.0 * i, 0.0, 2.0 * j);
+			field.position = glm::vec3(2.0 * j, 0.0, 2.0 * i);
 			field.model = glm::translate(field.model, field.position);
 			field.makeObject(Generic_Shader);
 			if ((i + j) % 2 == 0) {
@@ -453,7 +496,7 @@ int main(int argc, char* argv[])
 
 	// mark first pawn as selected
 	//pawns[3].selected = 1.0;
-	meeples[3].selected = 1.0;
+	meeples[0].selected = 1.0;
 
 	// mark first dark field as selected;
 	board[1][0].selected = 1.0;
@@ -551,7 +594,7 @@ int main(int argc, char* argv[])
         processKeyboardCameraInput(window);
 		//processSelected(window, pawns);
 		processSelected(window, meeples);
-		processSelectedField(window, board);
+		processSelectedField(window, board, meeples);
 		view = camera.GetViewMatrix();
 		glfwPollEvents();
         glfwSetKeyCallback(window, key_callback); //Lookout for ALT keypress
