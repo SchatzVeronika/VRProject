@@ -224,7 +224,7 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 		if (flag) {
 			next_row[0] = current_row + 1;	// the fields that can be selected for the selected meeple are one row in front of the selected meeple (meeples can only move forward)
 			next_row[1] = current_row - 1;
-			next_column = current_column + 1;
+			next_column = current_column + 1;	//todo: use current_column - 1; if meeple is dark colored.
 			break;
 		}
 	}
@@ -233,26 +233,37 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 	std::cout << "next row1" << next_row[1] << std::endl;
 	std::cout << "current column"<< current_column << std::endl;
 	std::cout << "next column"<< next_column << std::endl;*/
-	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !fKeyPressed) {			// select next field in array board and unselect the current field
-		board[index_i][index_j].selected = 0.0;
+	if (next_row[0] >= 0 && next_row[0] < board.size() && next_row[1] >= 0 && next_row[1] < board.size()) {		// check if both indices of next_row are inside the bounds of the board
+		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !fKeyPressed) {
+			i_row = (i_row + 1) % 2;	// alternate between the two indices
+			board[index_i][index_j].selected = 0.0;	// reset current selected field
+			board[next_row[i_row]][next_column].selected = 1.0;
+			std::cout << "both" << std::endl;
+			fKeyPressed = true;
+		}
+		else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE) {
+			fKeyPressed = false;  // Reset the f key
+		}
+	}
+	else if (next_row[0] >= 0 && next_row[0] < board.size()) {		// if only one index is within the bounds of the board array
+		board[index_i][index_j].selected = 0.0;	// reset current selected field
+		std::cout << "only index0" << std::endl;
+		i_row = next_row[0];
+		board[i_row][next_column].selected = 1.0;
+	}
+	else if (next_row[1] >= 0 && next_row[1] < board.size()) {		// if only one index is within the bounds of the board array
+		board[index_i][index_j].selected = 0.0;	// reset current selected field
+		std::cout << "only index1" << std::endl;
+		i_row = next_row[1];
+		board[i_row][next_column].selected = 1.0;
+	}
+	
+	/*if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !fKeyPressed) {			// select next field in array board and unselect the current field
+		
 		int next_i = index_i;
 		std::cout << "irow" << i_row << std::endl;
 
-		if (next_row[0] >= 0 && next_row[0] < board.size() && next_row[1] >= 0 && next_row[1] < board.size()) {		// check if both indices of next_row are inside the bounds of the board
-			i_row = (i_row + 1) % 2;	// alternate between the two indices
-			board[next_row[i_row]][next_column].selected = 1.0;
-			std::cout << "both" << std::endl;
-		}
-		else if (next_row[0] >= 0 && next_row[0] < board.size()) {		// if only one index is within the bounds of the board array
-			std::cout << "only index0" << std::endl;
-			i_row = next_row[0];
-			board[i_row][next_column].selected = 1.0;
-		}
-		else if (next_row[1] >= 0 && next_row[1] < board.size()) {		// if only one index is within the bounds of the board array
-			std::cout << "only index1" << std::endl;
-			i_row = next_row[1];
-			board[i_row][next_column].selected = 1.0;
-		}
+
 
 		/*if (i_row < next_row.size() - 1 && next_row[i_row] >= 0 && next_row[i_row] < board.size()) {
 			board[next_row[i_row]][next_column].selected = 1.0;
@@ -281,12 +292,7 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 
 		board[next_i][next_row].selected = 1.0;
 		*/
-		fKeyPressed = true;
 	}
-	else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE) {
-		fKeyPressed = false;  // Reset the f key
-	}
-}
 
 
 void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std::vector<Object>& meeples) {
@@ -421,7 +427,7 @@ int main(int argc, char* argv[])
 	}
 
 	// load and arrange pawns
-	char path_text_pawn[] = PATH_TO_TEXTURE"/texPawn.jpg";
+	/*char path_text_pawn[] = PATH_TO_TEXTURE"/texPawn.jpg";
 	GLuint texture_pawn = loadTexture(path_text_pawn);
 	char pathPawn[] = PATH_TO_OBJECTS"/pawn.obj";
 	/*std::vector<Object> pawns;
@@ -436,13 +442,26 @@ int main(int argc, char* argv[])
 	*/
 
 	// load and arrange meeples
+	char Darkmeeple_texturePath[] = PATH_TO_TEXTURE"/meeples/Darkmeeple.jpg";
+	GLuint Darkmeeple_texture = loadTexture(Darkmeeple_texturePath);
 	char path_meeple[] = PATH_TO_OBJECTS"/meeple.obj";
-	std::vector<Object> meeples;
-	for (int i = 0; i < 4; i++) {
-		Object meeple(path_meeple);
-		meeple.model = glm::translate(meeple.model, glm::vec3(2.0*i, 2.0, 2.0));
-		meeple.makeObject(Generic_Shader);
-		meeples.push_back(meeple);
+	std::vector<Object> Darkmeeples;
+	for (int i = 0; i < 2; i++) {
+		Object Darkmeeple(path_meeple);
+		Darkmeeple.color = "dark";
+		Darkmeeple.model = glm::translate(Darkmeeple.model, glm::vec3(2.0*i, 2.0, 2.0));
+		Darkmeeple.makeObject(Generic_Shader);
+		Darkmeeples.push_back(Darkmeeple);
+	}
+	std::vector<Object> Brightmeeples;
+	char Brightmeeple_texturePath[] = PATH_TO_TEXTURE"/meeples/Brightmeeple.jpg";
+	GLuint Brightmeeple_texture = loadTexture(Brightmeeple_texturePath);
+	for (int i = 0; i < 2; i++) {
+		Object Brightmeeple(path_meeple);
+		Brightmeeple.color = "bright";
+		Brightmeeple.model = glm::translate(Brightmeeple.model, glm::vec3(2.0 * i, 2.0, 2.0));
+		Brightmeeple.makeObject(Generic_Shader);
+		Brightmeeples.push_back(Brightmeeple);
 	}
 	//meeple.model = glm::scale(meeple.model, glm::vec3(1.5, 1.5, 1.5));
 
@@ -516,7 +535,7 @@ int main(int argc, char* argv[])
 
 	// mark first pawn as selected
 	//pawns[3].selected = 1.0;
-	meeples[0].selected = 1.0;
+	Brightmeeples[0].selected = 1.0;
 
 	// mark first dark field as selected;
 	board[1][0].selected = 1.0;
@@ -539,13 +558,13 @@ int main(int argc, char* argv[])
 	int i_meeple = 0;
 	for (int i = 0; i < board.size(); i++) {
 		for (int j = 0; j < board[i].size(); j++) {
-			if (i_meeple == meeples.size()/2.0) {
+			if (i_meeple == Brightmeeples.size()) {
 				break;
 			}
 			if (board[j][i].color == "black") {
 				glm::vec3 cube_pos = board[j][i].getPos();
-				meeples[i_meeple].position = glm::vec3(cube_pos.x, cube_pos.y + 1.2, cube_pos.z);
-				meeples[i_meeple].model = glm::translate(glm::mat4(1.0f), meeples[i_meeple].position);
+				Brightmeeples[i_meeple].position = glm::vec3(cube_pos.x, cube_pos.y + 1.2, cube_pos.z);
+				Brightmeeples[i_meeple].model = glm::translate(glm::mat4(1.0f), Brightmeeples[i_meeple].position);
 				i_meeple += 1;
 
 			}
@@ -553,17 +572,17 @@ int main(int argc, char* argv[])
 	}
 
 	// place second half meeples on one side of the board
-	i_meeple = meeples.size() / 2.0;
+	i_meeple = 0;
 	for (int i = board.size()-1; i >= 0; i--) {
 		for (int j = board[i].size()-1; j >= 0; j--) {
-			if (i_meeple == meeples.size()) {
+			if (i_meeple == Darkmeeples.size()) {
 				break;
 			}
 			if (board[j][i].color == "black") {
 				std::cout << i <<j << std::endl;
 				glm::vec3 cube_pos = board[j][i].getPos();
-				meeples[i_meeple].position = glm::vec3(cube_pos.x, cube_pos.y + 1.2, cube_pos.z);
-				meeples[i_meeple].model = glm::translate(glm::mat4(1.0f), meeples[i_meeple].position);
+				Darkmeeples[i_meeple].position = glm::vec3(cube_pos.x, cube_pos.y + 1.2, cube_pos.z);
+				Darkmeeples[i_meeple].model = glm::translate(glm::mat4(1.0f), Darkmeeples[i_meeple].position);
 				i_meeple += 1;
 
 			}
@@ -613,8 +632,8 @@ int main(int argc, char* argv[])
 	while (!glfwWindowShouldClose(window)) {
         processKeyboardCameraInput(window);
 		//processSelected(window, pawns);
-		processSelected(window, meeples);
-		processSelectedField(window, board, meeples);
+		processSelected(window, Brightmeeples);
+		processSelectedField(window, board, Brightmeeples);
 		view = camera.GetViewMatrix();
 		glfwPollEvents();
         glfwSetKeyCallback(window, key_callback); //Lookout for ALT keypress
@@ -624,7 +643,7 @@ int main(int argc, char* argv[])
 
 		// Enter moves meeples to selected cube
 		if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS && !enterKeyPressed) {
-			moveMeeple(window, board, meeples);
+			moveMeeple(window, board, Brightmeeples);
 			enterKeyPressed = true;
 		}
 		else if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE) {
@@ -638,14 +657,25 @@ int main(int argc, char* argv[])
         Generic_Shader.setVector3f("light.light_color", light_col);
         Generic_Shader.setVector3f("u_view_pos", camera.Position);
 
-		for (auto& meeple : meeples) {
+		for (auto& meeple : Brightmeeples) {
 			Generic_Shader.use();
 			Generic_Shader.setMatrix4("M", meeple.model);
 			//Generic_Shader.setMatrix4("itM", inverseModel);
 			Generic_Shader.setInteger("ourTexture", 0);
 			Generic_Shader.setFloat("selected", meeple.selected);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, texture_pawn);
+			glBindTexture(GL_TEXTURE_2D, Brightmeeple_texture);
+			glDepthFunc(GL_LEQUAL);
+			meeple.draw();
+		}
+		for (auto& meeple : Darkmeeples) {
+			Generic_Shader.use();
+			Generic_Shader.setMatrix4("M", meeple.model);
+			//Generic_Shader.setMatrix4("itM", inverseModel);
+			Generic_Shader.setInteger("ourTexture", 0);
+			Generic_Shader.setFloat("selected", meeple.selected);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, Darkmeeple_texture);
 			glDepthFunc(GL_LEQUAL);
 			meeple.draw();
 		}
