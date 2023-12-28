@@ -127,8 +127,7 @@ bool lKeyPressed = false;
 bool fKeyPressed = false;
 bool enterKeyPressed = false;
 // storing the selected indices
-int index_selectedMeeple = 0;
-std::pair<int, int> indices_selectedCube = {0, 0};
+int selectedMeeple_old = 0;
 
 
 std::pair<int, int> getSelectedCube(std::vector<std::vector<Object>>& board) {
@@ -240,11 +239,11 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 	std::cout << "current column"<< current_column << std::endl;
 	std::cout << "next column"<< next_column << std::endl;
 	std::cout << "board size " << board.size() << std::endl;*/
-	std::cout << "irow " << i_row << std::endl;
+	//std::cout << "irow " << i_row << std::endl;
 	bool boardEnd_reached = false;
 	if (next_column >= board.size()) {		// end of board reached
 		boardEnd_reached = true;
-		std::cout << "end reached" << std::endl;
+		//std::cout << "end reached" << std::endl;
 	}
 	// select the value for i_row
 	if (i_row != 0 && i_row != 1) {
@@ -261,19 +260,19 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 
 	// select new field depending on current field
 	if (next_row[0] >= 0 && next_row[0] < board.size() && next_row[1] >= 0 && next_row[1] < board.size() && !boardEnd_reached) {		// check if both indices of next_row are inside the bounds of the board
-		std::cout << "both" << std::endl;
+		//std::cout << "both" << std::endl;
 		board[index_i][index_j].selected = 0.0;	// reset current selected field
 		board[next_row[i_row]][next_column].selected = 1.0;
 	}
 	else if (next_row[0] >= 0 && next_row[0] < board.size() && !boardEnd_reached) {		// if only one index is within the bounds of the board array
 		board[index_i][index_j].selected = 0.0;	// reset current selected field
-		std::cout << "only index0" << std::endl;
+		//std::cout << "only index0" << std::endl;
 		i_row = next_row[0];
 		board[i_row][next_column].selected = 1.0;
 	}
 	else if (next_row[1] >= 0 && next_row[1] < board.size() && !boardEnd_reached) {		// if only one index is within the bounds of the board array
 		board[index_i][index_j].selected = 0.0;	// reset current selected field
-		std::cout << "only index1" << std::endl;
+		//std::cout << "only index1" << std::endl;
 		i_row = next_row[1];
 		board[i_row][next_column].selected = 1.0;
 	}
@@ -325,6 +324,36 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
 	glm::vec3 cube_pos = board[board_i][board_j].getPos();
 	meeples[index_pawn].position = glm::vec3(cube_pos.x, cube_pos.y + 1.2, cube_pos.z);	// update position of meeple
 	meeples[index_pawn].model = glm::translate(glm::mat4(1.0f), meeples[index_pawn].position);		// move meeple to the new position
+
+}
+
+void processnextTurn(GLFWwindow* window, std::vector<Object>& Darkmeeples, std::vector<Object>& Brightmeeples) {
+	int currentMeeple = 0;
+	// find out which team's turn it is
+	std::string currentTeam = "dark";
+	for (auto& meeple : Brightmeeples) {
+		if (meeple.selected == 1.0) {
+			currentTeam = "bright";
+			currentMeeple = getSelectedPawn(Brightmeeples);		// store the index of the selected meeple of the current team
+			break;
+		}
+	}
+
+	std::cout << "current meeple index: " << currentMeeple << std::endl;
+	//std::cout << "current meeple index: " << currentMeeple << std::endl;
+
+	// unselect the meeple of the current team and select the other teams meeple
+	if (currentTeam == "bright") {
+		std::cout << "test" << std::endl;
+		Brightmeeples[currentMeeple].selected = 0.0;
+		Darkmeeples[selectedMeeple_old].selected = 1.0;	// mark pawn of last turn red again
+		selectedMeeple_old = currentMeeple;
+	}
+	else if (currentTeam == "dark") {
+		Darkmeeples[currentMeeple].selected = 0.0;
+		Brightmeeples[selectedMeeple_old].selected = 1.0;	// mark pawn of last turn red again
+		selectedMeeple_old = currentMeeple;
+	}
 
 }
 
@@ -665,6 +694,7 @@ int main(int argc, char* argv[])
 		// Enter moves meeples to selected cube
 		if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS && !enterKeyPressed) {
 			moveMeeple(window, board, Brightmeeples);
+			processnextTurn(window, Darkmeeples, Brightmeeples);
 			enterKeyPressed = true;
 		}
 		else if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE) {
