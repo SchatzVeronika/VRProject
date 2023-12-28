@@ -1,18 +1,12 @@
-#include<iostream>
-
-//include glad before GLFW to avoid header conflict or define "#define GLFW_INCLUDE_NONE"
+#include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
 #include <glm/glm.hpp>
-#include<glm/gtc/matrix_transform.hpp>
-#include<glm/gtc/type_ptr.hpp>
-
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-
 #include <map>
-
 #include "camera.h"
 #include "shader.h"
 #include "object.h"
@@ -22,29 +16,34 @@ const int window_width = 800;
 const int window_height = 800;
 
 bool firstMouse = true; // for mouse_callback
-float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right, so we initially rotate a bit to the left.
+float yaw = -90.0f;
 float pitch = 0.0f;
 float lastX = 800.0f / 2.0;
 float lastY = 600.0 / 2.0;
 int i_row = 0;
-
-float fov = 45.0f;
-
+float fov = 66.0f;
 bool isCursorCaptured = true; // Initially capture the cursor
-// #######################################
 
+// Define camera attributes
+glm::vec3 cameraPosition = glm::vec3(0.0f, 17.0f, 30.0f);
+float aspectRatio = 1.0;
+float nearPlane = 0.1f;
+float farPlane = 1000.0f;
 
+// Create camera and projection matrix
+Camera camera(cameraPosition);
+glm::mat4 view = camera.GetViewMatrix();
+glm::mat4 perspective = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 
+// Function Declarations
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
 GLuint compileShader(std::string shaderCode, GLenum shaderType);
 GLuint compileProgram(GLuint vertexShader, GLuint fragmentShader);
-
 void processKeyboardCameraInput(GLFWwindow* window);
-
 void loadCubemapFace(const char* path, const GLenum& targetFace);
+
 
 #ifndef NDEBUG
 void APIENTRY glDebugOutput(GLenum source,
@@ -121,7 +120,7 @@ GLuint loadTexture(const char* path) {
 	return texture;
 }
 
-Camera camera(glm::vec3(0.0, 30.0, 60.0));
+//Camera camera(glm::vec3(0.0, 30.0, 60.0));
 
 // we need to make sure that the keys for selecting the pieces are only selected ones and not continuously:
 bool nKeyPressed = false;
@@ -395,6 +394,17 @@ int main(int argc, char* argv[])
 		};
 // ###########################################
 
+    char pathRoom[] = PATH_TO_OBJECTS"/room/room_full.obj";
+    Object room(pathRoom);
+    room.model = glm::scale(room.model, glm::vec3(0.5, 0.5, 0.5));
+    room.position = glm::vec3(7.0, -5.0, 10.0);
+    room.model = glm::translate(room.model, room.position);
+    room.makeObject(Generic_Shader);
+
+    char pathRoomTexture[] = PATH_TO_TEXTURE"/room/subtle.png";
+    GLuint RoomTexture = loadTexture(pathRoomTexture);
+
+
 
 // ######## Objects #######################
 // Chess Board Chopped
@@ -414,7 +424,7 @@ int main(int argc, char* argv[])
 		std::vector<Object> row;
 		for (int j = 0; j < 4; j++) {
 			Object field(pathBoard);
-			field.position = glm::vec3(2.0 * j, 0.0, 2.0 * i);
+			field.position = glm::vec3(2.0 * j, 1.0, 2.0 * i);
 			field.model = glm::translate(field.model, field.position);
 			field.makeObject(Generic_Shader);
 			if ((i + j) % 2 == 0) {
@@ -459,7 +469,7 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < 2; i++) {
 		Object Brightmeeple(path_meeple);
 		Brightmeeple.color = "bright";
-		Brightmeeple.model = glm::translate(Brightmeeple.model, glm::vec3(2.0 * i, 2.0, 2.0));
+		Brightmeeple.model = glm::translate(Brightmeeple.model, glm::vec3(2.0 * i, 3.0, 2.0));
 		Brightmeeple.makeObject(Generic_Shader);
 		Brightmeeples.push_back(Brightmeeple);
 	}
@@ -480,10 +490,6 @@ int main(int argc, char* argv[])
 	// sphere
 	sphere3.model = glm::translate(sphere3.model, glm::vec3(0.0, 0.0, 0.0));
 	sphere3.model = glm::scale(sphere3.model, glm::vec3(1.5, 1.5, 1.5));
-
-	// camera variables:
-	glm::mat4 view = camera.GetViewMatrix();
-	glm::mat4 perspective = camera.GetProjectionMatrix();
 
 
 	// light:
@@ -737,6 +743,15 @@ int main(int argc, char* argv[])
 		Debug_Sphere_Shader.setMatrix4("P", perspective);
 		Debug_Sphere_Shader.setMatrix4("M", sphere3.model);
 		//sphere3.draw();
+
+        Generic_Shader.use();
+        Generic_Shader.setMatrix4("M", room.model);
+        Generic_Shader.setInteger("ourTexture", 0);
+        Generic_Shader.setFloat("selected", room.selected);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, RoomTexture);
+        glDepthFunc(GL_LEQUAL);
+        room.draw();
 
 		fps(now);
 		glfwSwapBuffers(window);

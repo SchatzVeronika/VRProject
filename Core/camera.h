@@ -77,9 +77,9 @@ public:
     {
         float velocity = this->MovementSpeed * deltaTime;
         if (direction == FORWARD)
-            this->Position += this->Front * velocity;
+            this->Position += glm::normalize(glm::vec3(this->Front.x, 0.0f, this->Front.z)) * velocity; // Move only along x and z axes
         if (direction == BACKWARD)
-            this->Position -= this->Front * velocity;
+            this->Position -= glm::normalize(glm::vec3(this->Front.x, 0.0f, this->Front.z)) * velocity; // Move only along x and z axes
         if (direction == LEFT)
             this->Position -= this->Right * velocity;
         if (direction == RIGHT)
