@@ -168,21 +168,35 @@ std::string getCurrentTeam(std::vector<Object>& Brightmeeples, std::vector<Objec
 }
 
 
-void processSelected(GLFWwindow* window, std::vector<Object>& object) {
+void processSelectedMeeple(GLFWwindow* window, std::vector<Object>& Brightmeeples, std::vector<Object>& Darkmeeples) {
+	std::string currentTeam = getCurrentTeam(Brightmeeples, Darkmeeples);
+	std::vector<Object>& meeples = (currentTeam == "dark") ? Darkmeeples : Brightmeeples;	// choose either dark or bright meeples depending on whos round it is
 	// find the index of the piece that is currently selected
-	int index = 0;
-	for (int i = 0; i < object.size(); i++) {
-		if (object[i].selected == 1.0) {
-			index = i;
+	int index = getSelectedPawn(meeples);
+	// reset all meeples of the other team:
+	if (currentTeam == "dark") {
+		for (auto& meeple : Brightmeeples) {
+			meeple.selected = 0.0;
 		}
 	}
+	else {
+		for (auto& meeple : Darkmeeples) {
+			meeple.selected = 0.0;
+		}
+	}
+
+	/*for (int i = 0; i < meeples.size(); i++) {
+		if (meeples[i].selected == 1.0) {
+			index = i;
+		}
+	}*/
 	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS && !nKeyPressed) {			// select next pawn in array pawns and unselect the current pawn
-		object[index].selected = 0.0;
-		if (index < object.size() - 1) {
-			object[index + 1].selected = 1.0;
+		meeples[index].selected = 0.0;
+		if (index < meeples.size() - 1) {
+			meeples[index + 1].selected = 1.0;
 		}
 		else {
-			object[0].selected = 1.0;		// start from beginning or array
+			meeples[0].selected = 1.0;		// start from beginning or array
 		}
 		nKeyPressed = true;
 	}
@@ -190,12 +204,12 @@ void processSelected(GLFWwindow* window, std::vector<Object>& object) {
 		nKeyPressed = false;  // Reset the n key
 	}
 	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS && !lKeyPressed) {			// select last pawn in array pawns and unselect the current pawn
-		object[index].selected = 0.0;
+		meeples[index].selected = 0.0;
 		if (index > 0) {
-			object[index - 1].selected = 1.0;
+			meeples[index - 1].selected = 1.0;
 		}
 		else {
-			object[object.size() - 1].selected = 1.0;		// select the last piece in array
+			meeples[meeples.size() - 1].selected = 1.0;		// select the last piece in array
 		}
 		lKeyPressed = true;
 	}
@@ -374,12 +388,12 @@ void processnextTurn(GLFWwindow* window, std::vector<Object>& Darkmeeples, std::
 		}
 	}
 
-	std::cout << "current meeple index: " << currentMeeple << std::endl;
+	//std::cout << "current meeple index: " << currentMeeple << std::endl;
 	//std::cout << "current meeple index: " << currentMeeple << std::endl;
 
 	// unselect the meeple of the current team and select the other teams meeple
 	if (currentTeam == "bright") {
-		std::cout << "test" << std::endl;
+		//std::cout << "test" << std::endl;
 		Brightmeeples[currentMeeple].selected = 0.0;
 		Darkmeeples[selectedMeeple_old].selected = 1.0;	// mark pawn of last turn red again
 		selectedMeeple_old = currentMeeple;
@@ -717,7 +731,7 @@ int main(int argc, char* argv[])
 	while (!glfwWindowShouldClose(window)) {
         processKeyboardCameraInput(window);
 		//processSelected(window, pawns);
-		processSelected(window, Brightmeeples);
+		processSelectedMeeple(window, Brightmeeples, Darkmeeples);
 		processSelectedField(window, board, Brightmeeples, Darkmeeples);
 		view = camera.GetViewMatrix();
 		glfwPollEvents();
