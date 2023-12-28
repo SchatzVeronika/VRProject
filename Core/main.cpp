@@ -156,6 +156,17 @@ int getSelectedPawn(std::vector<Object>& pawns) {
 	return index;
 }
 
+std::string getCurrentTeam(std::vector<Object>& Brightmeeples, std::vector<Object>& Darkmeeples) {
+	std::string currentTeam = "dark";
+	for (auto& meeple : Brightmeeples) {
+		if (meeple.selected == 1.0) {
+			currentTeam = "bright";
+			break;
+		}
+	}
+	return currentTeam;
+}
+
 
 void processSelected(GLFWwindow* window, std::vector<Object>& object) {
 	// find the index of the piece that is currently selected
@@ -194,12 +205,33 @@ void processSelected(GLFWwindow* window, std::vector<Object>& object) {
 
 }
 
-void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& board, std::vector<Object>& meeples) {
+void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& board, std::vector<Object>& Brightmeeples, std::vector<Object>& Darkmeeples) {
 	// find the index of the field that is currently selected
 	int index_i = getSelectedCube(board).first;
 	int index_j = getSelectedCube(board).second;
-	// find the position of meeple that is currently selected
+	std::string currentTeam = getCurrentTeam(Brightmeeples, Darkmeeples);
+	std::vector<Object>& meeples = (currentTeam == "dark") ? Darkmeeples : Brightmeeples;	// choose either dark or bright meeples depending on whos round it is
 	int i_selectedMeeple = getSelectedPawn(meeples);
+	/*int i_selectedMeeple;
+	std::vector<Object> meeples;
+	// find out which teams turn it is currently 
+	std::string currentTeam = "dark";
+	for (auto& meeple : Brightmeeples) {
+		if (meeple.selected == 1.0) {
+			currentTeam = "bright";
+			break;
+		}
+	}
+	//std::cout << currentTeam << std::endl;
+	// find the position of meeple that is currently selected
+	if (currentTeam == "dark") {
+		i_selectedMeeple = getSelectedPawn(Darkmeeples);
+		meeples = Darkmeeples;
+	}
+	else {
+		i_selectedMeeple = getSelectedPawn(Brightmeeples);
+		meeples = Brightmeeples;
+	}*/
 	//std::cout << i_selectedMeeple << std::endl;
 	glm::vec3 selectdMeeple_pos = meeples[i_selectedMeeple].getPos();
 	selectdMeeple_pos.y=0;		// compensate for translation of meeples wrt the board in y direction
@@ -315,9 +347,12 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 	}
 
 
-void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std::vector<Object>& meeples) {
+void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std::vector<Object>& Brightmeeples, std::vector<Object>& Darkmeeples) {
 	int board_i = getSelectedCube(board).first;
 	int board_j = getSelectedCube(board).second;
+	std::string currentTeam = getCurrentTeam(Brightmeeples, Darkmeeples);
+	std::vector<Object>& meeples = (currentTeam == "dark") ? Darkmeeples : Brightmeeples;	// choose either dark or bright meeples depending on whos round it is
+	
 	int index_pawn = getSelectedPawn(meeples);
 
 	// get position of selected cube
@@ -683,7 +718,7 @@ int main(int argc, char* argv[])
         processKeyboardCameraInput(window);
 		//processSelected(window, pawns);
 		processSelected(window, Brightmeeples);
-		processSelectedField(window, board, Brightmeeples);
+		processSelectedField(window, board, Brightmeeples, Darkmeeples);
 		view = camera.GetViewMatrix();
 		glfwPollEvents();
         glfwSetKeyCallback(window, key_callback); //Lookout for ALT keypress
@@ -693,7 +728,7 @@ int main(int argc, char* argv[])
 
 		// Enter moves meeples to selected cube
 		if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS && !enterKeyPressed) {
-			moveMeeple(window, board, Brightmeeples);
+			moveMeeple(window, board, Brightmeeples, Darkmeeples);
 			processnextTurn(window, Darkmeeples, Brightmeeples);
 			enterKeyPressed = true;
 		}
