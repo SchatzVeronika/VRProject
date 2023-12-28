@@ -20,14 +20,12 @@
 // ######## Session Variables ############
 const int window_width = 800;
 const int window_height = 800;
-
 bool firstMouse = true; // for mouse_callback
 float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right, so we initially rotate a bit to the left.
 float pitch = 0.0f;
 float lastX = 800.0f / 2.0;
 float lastY = 600.0 / 2.0;
 int i_row = 0;
-
 float fov = 45.0f;
 
 bool isCursorCaptured = true; // Initially capture the cursor
@@ -123,12 +121,15 @@ GLuint loadTexture(const char* path) {
 
 Camera camera(glm::vec3(0.0, 30.0, 60.0));
 
-// we need to make sure that the keys for selecting the pieces are only selected ones and not continuously:
+// some global variables
 bool nKeyPressed = false;
 bool lKeyPressed = false;
 bool fKeyPressed = false;
 bool enterKeyPressed = false;
-bool alternate = false;
+// storing the selected indices
+int index_selectedMeeple = 0;
+std::pair<int, int> indices_selectedCube = {0, 0};
+
 
 std::pair<int, int> getSelectedCube(std::vector<std::vector<Object>>& board) {
 	// find the index of the field that is currently selected
@@ -224,7 +225,12 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 		if (flag) {
 			next_row[0] = current_row + 1;	// the fields that can be selected for the selected meeple are one row in front of the selected meeple (meeples can only move forward)
 			next_row[1] = current_row - 1;
-			next_column = current_column + 1;	//todo: use current_column - 1; if meeple is dark colored.
+			if (meeples[1].color == "bright") {
+				next_column = current_column + 1;	//todo: use current_column - 1; if meeple is dark colored.
+			}
+			else if (meeples[1].color == "dark") {
+				next_column = current_column - 1;		// iterate through board in other direction
+			}
 			break;
 		}
 	}
@@ -232,31 +238,46 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 	std::cout << "next row0" << next_row[0] << std::endl;
 	std::cout << "next row1" << next_row[1] << std::endl;
 	std::cout << "current column"<< current_column << std::endl;
-	std::cout << "next column"<< next_column << std::endl;*/
-	if (next_row[0] >= 0 && next_row[0] < board.size() && next_row[1] >= 0 && next_row[1] < board.size()) {		// check if both indices of next_row are inside the bounds of the board
-		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !fKeyPressed) {
-			i_row = (i_row + 1) % 2;	// alternate between the two indices
-			board[index_i][index_j].selected = 0.0;	// reset current selected field
-			board[next_row[i_row]][next_column].selected = 1.0;
-			std::cout << "both" << std::endl;
-			fKeyPressed = true;
-		}
-		else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE) {
-			fKeyPressed = false;  // Reset the f key
-		}
+	std::cout << "next column"<< next_column << std::endl;
+	std::cout << "board size " << board.size() << std::endl;*/
+	std::cout << "irow " << i_row << std::endl;
+	bool boardEnd_reached = false;
+	if (next_column >= board.size()) {		// end of board reached
+		boardEnd_reached = true;
+		std::cout << "end reached" << std::endl;
 	}
-	else if (next_row[0] >= 0 && next_row[0] < board.size()) {		// if only one index is within the bounds of the board array
+	// select the value for i_row
+	if (i_row != 0 && i_row != 1) {
+		i_row = 0;		// reset i_row if out of range
+	}
+	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !fKeyPressed) {
+		i_row = (i_row + 1) % 2;	// alternate between the two indices
+		fKeyPressed = true;
+
+	}
+	else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE) {
+		fKeyPressed = false;  // Reset the f key
+	}
+
+	// select new field depending on current field
+	if (next_row[0] >= 0 && next_row[0] < board.size() && next_row[1] >= 0 && next_row[1] < board.size() && !boardEnd_reached) {		// check if both indices of next_row are inside the bounds of the board
+		std::cout << "both" << std::endl;
+		board[index_i][index_j].selected = 0.0;	// reset current selected field
+		board[next_row[i_row]][next_column].selected = 1.0;
+	}
+	else if (next_row[0] >= 0 && next_row[0] < board.size() && !boardEnd_reached) {		// if only one index is within the bounds of the board array
 		board[index_i][index_j].selected = 0.0;	// reset current selected field
 		std::cout << "only index0" << std::endl;
 		i_row = next_row[0];
 		board[i_row][next_column].selected = 1.0;
 	}
-	else if (next_row[1] >= 0 && next_row[1] < board.size()) {		// if only one index is within the bounds of the board array
+	else if (next_row[1] >= 0 && next_row[1] < board.size() && !boardEnd_reached) {		// if only one index is within the bounds of the board array
 		board[index_i][index_j].selected = 0.0;	// reset current selected field
 		std::cout << "only index1" << std::endl;
 		i_row = next_row[1];
 		board[i_row][next_column].selected = 1.0;
 	}
+
 	
 	/*if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !fKeyPressed) {			// select next field in array board and unselect the current field
 		
@@ -449,7 +470,7 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < 2; i++) {
 		Object Darkmeeple(path_meeple);
 		Darkmeeple.color = "dark";
-		Darkmeeple.model = glm::translate(Darkmeeple.model, glm::vec3(2.0*i, 2.0, 2.0));
+		//Darkmeeple.model = glm::translate(Darkmeeple.model, glm::vec3(2.0*i, 2.0, 2.0));
 		Darkmeeple.makeObject(Generic_Shader);
 		Darkmeeples.push_back(Darkmeeple);
 	}
@@ -459,7 +480,7 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < 2; i++) {
 		Object Brightmeeple(path_meeple);
 		Brightmeeple.color = "bright";
-		Brightmeeple.model = glm::translate(Brightmeeple.model, glm::vec3(2.0 * i, 2.0, 2.0));
+		//Brightmeeple.model = glm::translate(Brightmeeple.model, glm::vec3(2.0 * i, 2.0, 2.0));
 		Brightmeeple.makeObject(Generic_Shader);
 		Brightmeeples.push_back(Brightmeeple);
 	}
