@@ -7,7 +7,7 @@
 - [ ] Better lightning
 
 ## Igors:
-- [ ] New cubemap + new floor
+- [x] New cubemap + new floor
 - [ ] Bullet library / Physics implementation
 - [x] Move shaders from main.cpp to /shaders
 - [x] Find a small checkers board / Create small boxes and merge them to represent the board (4x4)
