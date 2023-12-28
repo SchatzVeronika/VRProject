@@ -20,14 +20,21 @@ struct Light{
     float quadratic;
 };
 uniform Light light;
-vec3 materialColour = vec3(1.0,0.0,0.0);
+vec3 materialColour = vec3(1.0,1.0,1.0);
 
 uniform float shininess; 
 
-float specularCalculation(vec3 N, vec3 L, vec3 V ){
-    vec3 R = reflect (-L, N);//reflect (-L,N) is  equivalent to //max (2 * dot(N,L) * N - L , 0.0) ;
-    float cosTheta = dot(R, V);
-    float spec = pow(max(cosTheta, 0.0), shininess);
+//float specularCalculation(vec3 N, vec3 L, vec3 V ){
+//    vec3 R = reflect (-L, N);//reflect (-L,N) is  equivalent to //max (2 * dot(N,L) * N - L , 0.0) ;
+//    float cosTheta = dot(R, V);
+//    float spec = pow(max(cosTheta, 0.0), shininess);
+//    return light.specular_strength * spec;
+//}
+
+//Blinn-Phong specular calculation
+float blinnPhongSpecular(vec3 N, vec3 L, vec3 V) {
+    vec3 H = normalize(L + V); // Calculate halfway vector
+    float spec = pow(max(dot(N, H), 0.0), shininess); // Calculate specular intensity
     return light.specular_strength * spec;
 }
 
@@ -38,7 +45,7 @@ void main() {
     vec3 N = normalize(v_normal);
     vec3 L = normalize(light.light_pos - v_frag_coord);
     vec3 V = normalize(u_view_pos - v_frag_coord);
-    float specular = specularCalculation(N, L, V);
+    float specular = blinnPhongSpecular(N, L, V);
     float diffuse = light.diffuse_strength * max(dot(N, L), 0.0);
     float distance = length(light.light_pos - v_frag_coord);
     float attenuation = 1 / (light.constant + light.linear * distance + light.quadratic * distance * distance);

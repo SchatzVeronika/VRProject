@@ -493,13 +493,13 @@ int main(int argc, char* argv[])
 
 
 	// light:
-	glm::vec3 light_pos = glm::vec3(0.0, 5.0, 0.0);
-	glm::vec3 light_col = glm::vec3(1.0, 1.0, 1.0);
+    glm::vec3 light_pos = glm::vec3(30.0, 50.0, -20.0);
+    glm::vec3 light_col = glm::vec3(1.5, 1.5, 1.5);
 
-	float ambient = 0.5;
-	float diffuse = 0.5;
-	float specular = 0.5;
-	float shininess = 1.0;
+    float ambient = 1.0;
+	float diffuse = 0.8;
+	float specular = 0.8;
+	float shininess = 10.0;
 
     Generic_Shader.use();
     Generic_Shader.setFloat("shininess", shininess);
