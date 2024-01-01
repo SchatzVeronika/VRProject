@@ -119,7 +119,7 @@ GLuint loadTexture(const char* path) {
 	return texture;
 }
 
-Camera camera(glm::vec3(0.0, 30.0, 60.0));
+Camera camera(glm::vec3(0.0, 15.0, 20.0));
 
 // some global variables
 bool nKeyPressed = false;
@@ -128,6 +128,9 @@ bool fKeyPressed = false;
 bool enterKeyPressed = false;
 // storing the selected indices
 int selectedMeeple_old = 0;
+
+std::string current_Team = "bright";
+int dbug_counter = 0;
 
 
 std::pair<int, int> getSelectedCube(std::vector<std::vector<Object>>& board) {
@@ -191,24 +194,58 @@ void processSelectedMeeple(GLFWwindow* window, std::vector<Object>& Brightmeeple
 		}
 	}*/
 	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS && !nKeyPressed) {			// select next pawn in array pawns and unselect the current pawn
-		meeples[index].selected = 0.0;
-		if (index < meeples.size() - 1) {
+		/*if (index < meeples.size() - 1 && !meeples[index + 1].boardEnd_reached) {
+			meeples[index].selected = 0.0;
 			meeples[index + 1].selected = 1.0;
+			std::cout << "test1" << std::endl;
 		}
-		else {
+		else if (!meeples[0].boardEnd_reached) {
 			meeples[0].selected = 1.0;		// start from beginning or array
-		}
+			std::cout << "test1" << std::endl;
+		}*/
 		nKeyPressed = true;
+
+		//
+		meeples[index].selected = 0.0;
+		bool no_new_found = true;
+		bool break_it = true;
+		while (no_new_found) {
+			
+			/*
+			for (int i = 0; i < meeples.size(); i++) {
+				if (!meeples[i].boardEnd_reached)
+					break_it = false;
+
+			}
+
+			if (break_it)
+				std::cout << "no playable meeple (kings though)" << std::endl;
+				break;
+
+			*/
+			index++;
+
+			index = index % meeples.size();
+
+			if (!meeples[index].boardEnd_reached) {
+				meeples[index].selected = 1.0;
+				no_new_found = false;
+			}
+			//
+		}
+
+
 	}
+	
 	else if (glfwGetKey(window, GLFW_KEY_N) == GLFW_RELEASE) {
 		nKeyPressed = false;  // Reset the n key
 	}
-	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS && !lKeyPressed) {			// select last pawn in array pawns and unselect the current pawn
+	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS && !lKeyPressed && !meeples[index-1].boardEnd_reached) {			// select last pawn in array pawns and unselect the current pawn
 		meeples[index].selected = 0.0;
 		if (index > 0) {
 			meeples[index - 1].selected = 1.0;
 		}
-		else {
+		else if (!meeples[meeples.size() - 1].boardEnd_reached){
 			meeples[meeples.size() - 1].selected = 1.0;		// select the last piece in array
 		}
 		lKeyPressed = true;
@@ -271,7 +308,7 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 			next_row[0] = current_row + 1;	// the fields that can be selected for the selected meeple are one row in front of the selected meeple (meeples can only move forward)
 			next_row[1] = current_row - 1;
 			if (meeples[1].color == "bright") {
-				next_column = current_column + 1;	//todo: use current_column - 1; if meeple is dark colored.
+				next_column = current_column + 1;	
 			}
 			else if (meeples[1].color == "dark") {
 				next_column = current_column - 1;		// iterate through board in other direction
@@ -286,11 +323,7 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 	std::cout << "next column"<< next_column << std::endl;
 	std::cout << "board size " << board.size() << std::endl;*/
 	//std::cout << "irow " << i_row << std::endl;
-	bool boardEnd_reached = false;
-	if (next_column >= board.size()) {		// end of board reached
-		boardEnd_reached = true;
-		//std::cout << "end reached" << std::endl;
-	}
+
 	// select the value for i_row
 	if (i_row != 0 && i_row != 1) {
 		i_row = 0;		// reset i_row if out of range
@@ -305,18 +338,18 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
 	}
 
 	// select new field depending on current field
-	if (next_row[0] >= 0 && next_row[0] < board.size() && next_row[1] >= 0 && next_row[1] < board.size() && !boardEnd_reached) {		// check if both indices of next_row are inside the bounds of the board
+	if (next_row[0] >= 0 && next_row[0] < board.size() && next_row[1] >= 0 && next_row[1] < board.size()) {		// check if both indices of next_row are inside the bounds of the board
 		//std::cout << "both" << std::endl;
 		board[index_i][index_j].selected = 0.0;	// reset current selected field
 		board[next_row[i_row]][next_column].selected = 1.0;
 	}
-	else if (next_row[0] >= 0 && next_row[0] < board.size() && !boardEnd_reached) {		// if only one index is within the bounds of the board array
+	else if (next_row[0] >= 0 && next_row[0] < board.size()) {		// if only one index is within the bounds of the board array
 		board[index_i][index_j].selected = 0.0;	// reset current selected field
 		//std::cout << "only index0" << std::endl;
 		i_row = next_row[0];
 		board[i_row][next_column].selected = 1.0;
 	}
-	else if (next_row[1] >= 0 && next_row[1] < board.size() && !boardEnd_reached) {		// if only one index is within the bounds of the board array
+	else if (next_row[1] >= 0 && next_row[1] < board.size()) {		// if only one index is within the bounds of the board array
 		board[index_i][index_j].selected = 0.0;	// reset current selected field
 		//std::cout << "only index1" << std::endl;
 		i_row = next_row[1];
@@ -369,39 +402,74 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
 	
 	int index_pawn = getSelectedPawn(meeples);
 
+
 	// get position of selected cube
 	glm::vec3 cube_pos = board[board_i][board_j].getPos();
 	meeples[index_pawn].position = glm::vec3(cube_pos.x, cube_pos.y + 1.2, cube_pos.z);	// update position of meeple
 	meeples[index_pawn].model = glm::translate(glm::mat4(1.0f), meeples[index_pawn].position);		// move meeple to the new position
+
+	if (meeples[index_pawn].position.x >= board[0][3].position.x || meeples[index_pawn].position.x <= board[0][0].position.x) {		// end of board reached
+		meeples[index_pawn].boardEnd_reached = true;
+		std::cout << "end reached" << std::endl;
+	}
 
 }
 
 void processnextTurn(GLFWwindow* window, std::vector<Object>& Darkmeeples, std::vector<Object>& Brightmeeples) {
 	int currentMeeple = 0;
 	// find out which team's turn it is
-	std::string currentTeam = "dark";
-	for (auto& meeple : Brightmeeples) {
-		if (meeple.selected == 1.0) {
-			currentTeam = "bright";
-			currentMeeple = getSelectedPawn(Brightmeeples);		// store the index of the selected meeple of the current team
-			break;
-		}
-	}
+	//std::string currentTeam = getCurrentTeam(Brightmeeples, Darkmeeples);
 
-	//std::cout << "current meeple index: " << currentMeeple << std::endl;
+	std::cout << "current meeple team: " << current_Team << std::endl;
 	//std::cout << "current meeple index: " << currentMeeple << std::endl;
 
 	// unselect the meeple of the current team and select the other teams meeple
-	if (currentTeam == "bright") {
+	if (current_Team == "bright") {
 		//std::cout << "test" << std::endl;
-		Brightmeeples[currentMeeple].selected = 0.0;
-		Darkmeeples[selectedMeeple_old].selected = 1.0;	// mark pawn of last turn red again
-		selectedMeeple_old = currentMeeple;
+		//Brightmeeples[currentMeeple].selected = 0.0;
+
+		// std::cout << "Dark: boardEnd reached" << Darkmeeples[selectedMeeple_old].boardEnd_reached << std::endl;
+		// Darkmeeples[selectedMeeple_old].selected = 1.0;	// mark pawn of last turn red again
+		// selectedMeeple_old = currentMeeple;
+		
+		// fix
+		for (int i = 0; i < Brightmeeples.size(); i++) {
+				Brightmeeples[i].selected = 0.0;
+		}
+
+		for (int i = 0; i < Darkmeeples.size(); i++) {
+			if (!Darkmeeples[i].boardEnd_reached) {
+				Darkmeeples[i].selected = 1.0;
+				break;
+			}
+		}
+
+		current_Team = "dark";
+		// fix end
+
 	}
-	else if (currentTeam == "dark") {
-		Darkmeeples[currentMeeple].selected = 0.0;
-		Brightmeeples[selectedMeeple_old].selected = 1.0;	// mark pawn of last turn red again
-		selectedMeeple_old = currentMeeple;
+	else if (current_Team == "dark") {
+		// Darkmeeples[currentMeeple].selected = 0.0;
+		// std::cout << "Bright: boardEnd reached" << Brightmeeples[selectedMeeple_old].boardEnd_reached << std::endl;
+		// Brightmeeples[selectedMeeple_old].selected = 1.0;	// mark pawn of last turn red again
+		// selectedMeeple_old = currentMeeple;
+
+		// fix
+		// current dark, prep for next white
+		for (int i = 0; i < Darkmeeples.size(); i++) {
+			Darkmeeples[i].selected = 0.0;
+		}
+
+		for (int i = 0; i < Brightmeeples.size(); i++) {
+			if (!Brightmeeples[i].boardEnd_reached) {
+				Brightmeeples[i].selected = 1.0;
+				break;
+			}
+		}
+
+		current_Team = "bright";
+		// fix end
+		
 	}
 
 }
@@ -489,7 +557,7 @@ int main(int argc, char* argv[])
 			prev = now;
 			const double fpsCount = (double)deltaFrame / deltaTime;
 			deltaFrame = 0;
-			std::cout << "\r FPS: " << fpsCount;
+			// std::cout << "\r FPS: " << fpsCount;
 		}
 		};
 // ###########################################
@@ -509,9 +577,9 @@ int main(int argc, char* argv[])
 	GLuint Board_Texture_2 = loadTexture(path_Board_Colour_2);
 
 	char pathBoard[] = PATH_TO_OBJECTS"/Chess_Board_Chopped/Board_0x_0y.obj";
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 8; i++) {
 		std::vector<Object> row;
-		for (int j = 0; j < 4; j++) {
+		for (int j = 0; j < 8; j++) {
 			Object field(pathBoard);
 			field.position = glm::vec3(2.0 * j, 0.0, 2.0 * i);
 			field.model = glm::translate(field.model, field.position);
@@ -545,7 +613,7 @@ int main(int argc, char* argv[])
 	GLuint Darkmeeple_texture = loadTexture(Darkmeeple_texturePath);
 	char path_meeple[] = PATH_TO_OBJECTS"/meeple.obj";
 	std::vector<Object> Darkmeeples;
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < 12; i++) {
 		Object Darkmeeple(path_meeple);
 		Darkmeeple.color = "dark";
 		//Darkmeeple.model = glm::translate(Darkmeeple.model, glm::vec3(2.0*i, 2.0, 2.0));
@@ -555,7 +623,7 @@ int main(int argc, char* argv[])
 	std::vector<Object> Brightmeeples;
 	char Brightmeeple_texturePath[] = PATH_TO_TEXTURE"/meeples/Brightmeeple.jpg";
 	GLuint Brightmeeple_texture = loadTexture(Brightmeeple_texturePath);
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < 12; i++) {
 		Object Brightmeeple(path_meeple);
 		Brightmeeple.color = "bright";
 		//Brightmeeple.model = glm::translate(Brightmeeple.model, glm::vec3(2.0 * i, 2.0, 2.0));
@@ -729,10 +797,27 @@ int main(int argc, char* argv[])
     glfwSetKeyCallback(window, key_callback);
 
 	while (!glfwWindowShouldClose(window)) {
+
+		//
+		dbug_counter++;
+
+		if (dbug_counter > 300) {
+			dbug_counter = 0;
+
+			for (int i = 0; i < Brightmeeples.size(); i++) {
+				std::cout << "bright_i: " << i << ",     bright_selected: " << Brightmeeples[i].selected << "     bright_end_reached: " << Brightmeeples[i].boardEnd_reached << std::endl;
+			}
+
+			for (int i = 0; i < Darkmeeples.size(); i++) {
+				std::cout << "dark_i: " << i << ",     dark_selected: " << Darkmeeples[i].selected << ",     dark_end_reached: " << Darkmeeples[i].boardEnd_reached << std::endl;
+			}
+		}
+		//
+
         processKeyboardCameraInput(window);
 		//processSelected(window, pawns);
-		processSelectedMeeple(window, Brightmeeples, Darkmeeples);
 		processSelectedField(window, board, Brightmeeples, Darkmeeples);
+		processSelectedMeeple(window, Brightmeeples, Darkmeeples);
 		view = camera.GetViewMatrix();
 		glfwPollEvents();
         glfwSetKeyCallback(window, key_callback); //Lookout for ALT keypress
@@ -804,8 +889,8 @@ int main(int argc, char* argv[])
 		*/
 
 		// render the board
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
+		for (int i = 0; i < board.size(); i++) {
+			for (int j = 0; j < board.size(); j++) {
 				Generic_Shader.use();
 				Generic_Shader.setMatrix4("M", board[i][j].model);
 				Generic_Shader.setInteger("ourTexture", 0);
