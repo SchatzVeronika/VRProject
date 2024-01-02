@@ -41,6 +41,7 @@ public:
 	glm::vec3 position;
 
 	bool boardEnd_reached = false;
+	bool occupied = false;
 
 	Object(glm::vec3 Position) : position(Position){}		// to set a new position in main: objectxy.posiiton = glm::vec3(xpos,ypos,zpos);
 
