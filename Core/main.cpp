@@ -26,7 +26,7 @@ float fov = 66.0f;
 bool isCursorCaptured = true; // Initially capture the cursor
 
 // Define camera attributes
-glm::vec3 cameraPosition = glm::vec3(0.0f, 17.0f, 30.0f);
+glm::vec3 cameraPosition = glm::vec3(0.0f, 16.0f, 30.0f);
 float aspectRatio = 1.0;
 float nearPlane = 0.1f;
 float farPlane = 1000.0f;
@@ -219,25 +219,90 @@ int main(int argc, char* argv[])
     glm::mat4 perspective = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 
 	// Light:
-    glm::vec3 light_pos = glm::vec3(-5.0, 25.0f, 10.0);
-
-
-    float ambient = 0.1f;
-    float diffuse = 0.5f;
-    float specular = 0.5f;
+// Define multiple light positions
+    std::vector<glm::vec3> lightPositions = {
+            glm::vec3(-5.0f, 25.0f, 10.0f),
+            glm::vec3(-5.0f, 25.0f, 31.0f),
+            glm::vec3(33.0f, 25.0f, 12.0f),
+            glm::vec3(33.0f, 25.0f, 33.0f),
+            glm::vec3(35.0f, 25.0f, -10.0f),
+            glm::vec3(35.0f, 25.0f, -31.0f),
+            glm::vec3(35.0f, 25.0f, -57.0f),
+            glm::vec3(14.0f, 25.0f, 32.0f),
+    };
+    float ambient = 0.00001f;
+    float diffuse = 0.99f;
+    float specular = 0.0001f;
 
     glm::vec3 materialColour = glm::vec3(0.9f, 0.9f, 0.9f);
 
     Room_Shader.use();
-    Room_Shader.setVector3f("light.light_pos", light_pos);
-    Room_Shader.setFloat("shininess", 0.5f);
+    Room_Shader.setFloat("shininess", 0.2f);
     Room_Shader.setVector3f("materialColour", materialColour);
-    Room_Shader.setFloat("light.ambient_strength", ambient);
-    Room_Shader.setFloat("light.diffuse_strength", diffuse);
-    Room_Shader.setFloat("light.specular_strength", specular);
-    Room_Shader.setFloat("light.constant", 1.0);
-    Room_Shader.setFloat("light.linear", 0.14);
-    Room_Shader.setFloat("light.quadratic", 0.07);
+
+    Room_Shader.setVector3f("lights[0].light_pos", lightPositions[0]);
+    Room_Shader.setFloat("lights[0].ambient_strength", ambient);
+    Room_Shader.setFloat("lights[0].diffuse_strength", diffuse);
+    Room_Shader.setFloat("lights[0].specular_strength", specular);
+    Room_Shader.setFloat("lights[0].constant", 1.0);
+    Room_Shader.setFloat("lights[0].linear", 0.14);
+    Room_Shader.setFloat("lights[0].quadratic", 0.07);
+
+    Room_Shader.setVector3f("lights[1].light_pos", lightPositions[1]);
+    Room_Shader.setFloat("lights[1].ambient_strength", ambient);
+    Room_Shader.setFloat("lights[1].diffuse_strength", diffuse);
+    Room_Shader.setFloat("lights[1].specular_strength", specular);
+    Room_Shader.setFloat("lights[1].constant", 1.0);
+    Room_Shader.setFloat("lights[1].linear", 0.14);
+    Room_Shader.setFloat("lights[1].quadratic", 0.07);
+
+    Room_Shader.setVector3f("lights[2].light_pos", lightPositions[2]);
+    Room_Shader.setFloat("lights[2].ambient_strength", ambient);
+    Room_Shader.setFloat("lights[2].diffuse_strength", diffuse);
+    Room_Shader.setFloat("lights[2].specular_strength", specular);
+    Room_Shader.setFloat("lights[2].constant", 1.0);
+    Room_Shader.setFloat("lights[2].linear", 0.14);
+    Room_Shader.setFloat("lights[2].quadratic", 0.07);
+
+    Room_Shader.setVector3f("lights[3].light_pos", lightPositions[3]);
+    Room_Shader.setFloat("lights[3].ambient_strength", ambient);
+    Room_Shader.setFloat("lights[3].diffuse_strength", diffuse);
+    Room_Shader.setFloat("lights[3].specular_strength", specular);
+    Room_Shader.setFloat("lights[3].constant", 1.0);
+    Room_Shader.setFloat("lights[3].linear", 0.14);
+    Room_Shader.setFloat("lights[3].quadratic", 0.07);
+
+    Room_Shader.setVector3f("lights[4].light_pos", lightPositions[4]);
+    Room_Shader.setFloat("lights[4].ambient_strength", ambient);
+    Room_Shader.setFloat("lights[4].diffuse_strength", diffuse);
+    Room_Shader.setFloat("lights[4].specular_strength", specular);
+    Room_Shader.setFloat("lights[4].constant", 1.0);
+    Room_Shader.setFloat("lights[4].linear", 0.14);
+    Room_Shader.setFloat("lights[4].quadratic", 0.07);
+
+    Room_Shader.setVector3f("lights[5].light_pos", lightPositions[5]);
+    Room_Shader.setFloat("lights[5].ambient_strength", ambient);
+    Room_Shader.setFloat("lights[5].diffuse_strength", diffuse);
+    Room_Shader.setFloat("lights[5].specular_strength", specular);
+    Room_Shader.setFloat("lights[5].constant", 1.0);
+    Room_Shader.setFloat("lights[5].linear", 0.14);
+    Room_Shader.setFloat("lights[5].quadratic", 0.07);
+
+    Room_Shader.setVector3f("lights[6].light_pos", lightPositions[6]);
+    Room_Shader.setFloat("lights[6].ambient_strength", ambient);
+    Room_Shader.setFloat("lights[6].diffuse_strength", diffuse);
+    Room_Shader.setFloat("lights[6].specular_strength", specular);
+    Room_Shader.setFloat("lights[6].constant", 1.0);
+    Room_Shader.setFloat("lights[6].linear", 0.14);
+    Room_Shader.setFloat("lights[6].quadratic", 0.07);
+
+    Room_Shader.setVector3f("lights[7].light_pos", lightPositions[7]);
+    Room_Shader.setFloat("lights[7].ambient_strength", ambient);
+    Room_Shader.setFloat("lights[7].diffuse_strength", diffuse);
+    Room_Shader.setFloat("lights[7].specular_strength", specular);
+    Room_Shader.setFloat("lights[7].constant", 1.0);
+    Room_Shader.setFloat("lights[7].linear", 0.14);
+    Room_Shader.setFloat("lights[7].quadratic", 0.07);
 
 
 	// give texture to background (cubmap)
@@ -253,7 +318,7 @@ int main(int argc, char* argv[])
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	std::string pathToCubeMap = PATH_TO_TEXTURE"/cubemaps/Field/";
+	std::string pathToCubeMap = PATH_TO_TEXTURE"/cubemaps/Night/";
 
 	std::map<std::string, GLenum> facesToLoad = {
 		{pathToCubeMap + "posx.png",GL_TEXTURE_CUBE_MAP_POSITIVE_X},
@@ -288,7 +353,6 @@ int main(int argc, char* argv[])
         Generic_Shader.use();
         Generic_Shader.setMatrix4("V", view);
         Generic_Shader.setMatrix4("P", perspective);
-        Generic_Shader.setVector3f("u_light_pos", light_pos);
 
 
         Room_Shader.use();
