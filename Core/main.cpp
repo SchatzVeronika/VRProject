@@ -344,11 +344,11 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
 
 	if (meeples[index_pawn].position.z > cube_pos.z) {
 		direction = "up";
-		std::cout << "up" << std::endl;
+		
 	}
 	if (meeples[index_pawn].position.z < cube_pos.z) {
 		direction = "down";
-		std::cout << "down" << std::endl;
+		
 	}
 
 	// manage occupied fields
@@ -389,7 +389,6 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
 
 			// check if enemy there
 			if (Darkmeeples[i].position.x == cube_pos.x && Darkmeeples[i].position.z == cube_pos.z) {
-				std::cout << "oioioioi" << std::endl;
 
 				//check if behind is still inside the board
 				if (board_i - 1 >= 0 && board_i + 1 < board.size() && board_j - 1 >= 0 && board_j + 1 < board[0].size()) {
@@ -398,7 +397,6 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
 					if (direction == "up" && !board[board_i - 1][board_j + 1].occupied ||
 						direction == "down" && !board[board_i + 1][board_j + 1].occupied) {
 
-						std::cout << "krassomat digga" << std::endl;
 
 						// move piece special
 						normal_move = false;
@@ -406,12 +404,10 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
 						if (direction == "up") {
 							field_to_move_to = board[board_i - 1][board_j + 1].position;
 
-							std::cout << "whopper moved up" << std::endl;
 						}
 						if (direction == "down") {
 							field_to_move_to = board[board_i + 1][board_j + 1].position;
 
-							std::cout << "whopper moved down" << std::endl;
 						}
 
 						// remove jumped over piece
@@ -425,7 +421,6 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
 			}		
 			
 			if (break_free123) {
-				std::cout << "breaked for" << std::endl;
 				break;
 			}
 		}
@@ -439,7 +434,6 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
 
 			// check if enemy there
 			if (Brightmeeples[i].position.x == cube_pos.x && Brightmeeples[i].position.z == cube_pos.z) {
-				std::cout << "oioioioi" << std::endl;
 
 				//check if behind is still inside the board
 				if (board_i - 1 >= 0 && board_i + 1 < board.size() && board_j - 1 >= 0 && board_j + 1 < board[0].size()) {
@@ -448,7 +442,6 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
 					if (direction == "up" && !board[board_i - 1][board_j - 1].occupied ||
 						direction == "down" && !board[board_i + 1][board_j - 1].occupied) {
 
-						std::cout << "krassomat digga" << std::endl;
 
 						// move piece special
 						normal_move = false;
@@ -456,12 +449,10 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
 						if (direction == "up") {
 							field_to_move_to = board[board_i - 1][board_j - 1].position;
 
-							std::cout << "whopper moved up" << std::endl;
 						}
 						if (direction == "down") {
 							field_to_move_to = board[board_i + 1][board_j - 1].position;
 
-							std::cout << "whopper moved down" << std::endl;
 						}
 
 						// remove jumped over piece
@@ -475,7 +466,6 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
 			}
 				
 			if (break_free123) {
-				std::cout << "breaked for" << std::endl;
 				break;
 			}
 		}
@@ -509,7 +499,7 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
 
 	if (!unpermitted_move) {
 
-		std::cout << "i moved" << std::endl;
+
 
 		// normal move
 		meeples[index_pawn].position = glm::vec3(field_to_move_to.x, field_to_move_to.y + 1.2, field_to_move_to.z);	// update position of meeple
@@ -518,7 +508,6 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
 		// normal end turn check
 		if (meeples[index_pawn].position.x >= board[0][7].position.x || meeples[index_pawn].position.x <= board[0][0].position.x) {		// end of board reached
 			meeples[index_pawn].boardEnd_reached = true;
-			std::cout << "end reached" << std::endl;
 		}
 	}
 
@@ -574,7 +563,6 @@ void processnextTurn(GLFWwindow* window, std::vector<Object>& Darkmeeples, std::
 	// find out which team's turn it is
 	//std::string currentTeam = getCurrentTeam(Brightmeeples, Darkmeeples);
 
-	std::cout << "current meeple team: " << current_Team << std::endl;
 	//std::cout << "current meeple index: " << currentMeeple << std::endl;
 
 	// unselect the meeple of the current team and select the other teams meeple
