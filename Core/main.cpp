@@ -217,6 +217,10 @@ int main(int argc, char* argv[])
     room.position = glm::vec3(7.0, -5.0, 10.0);
     room.model = glm::translate(room.model, room.position);
 
+    char pathGlobe[] = PATH_TO_OBJECTS"/room/globe.obj";
+    Object globe(pathGlobe);
+    globe.makeObject(Room_Shader, false);
+
 
 
     glm::mat4 view = camera.GetViewMatrix();
@@ -370,6 +374,8 @@ int main(int argc, char* argv[])
         Room_Shader.setMatrix4("V", view);
         Room_Shader.setMatrix4("P", perspective);
         Room_Shader.setVector3f("u_view_pos", camera.Position);
+
+        globe.draw();
 
         glDepthFunc(GL_LEQUAL);
         room.draw();
