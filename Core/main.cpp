@@ -210,7 +210,7 @@ int main(int argc, char* argv[])
     Object cubeMap(pathCube);
     cubeMap.makeObject(cubeMapShader);
 
-    char pathRoom[] = PATH_TO_OBJECTS"/room/room_full.obj";
+    char pathRoom[] = PATH_TO_OBJECTS"/room/room_fixed.obj";
     Object room(pathRoom);
     room.makeObject(Room_Shader, false);
     room.model = glm::scale(room.model, glm::vec3(0.5, 0.5, 0.5));

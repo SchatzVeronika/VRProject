@@ -6,5 +6,5 @@ uniform samplerCube cubemapSampler;
 in vec3 texCoord_v;
 
 void main() {
-    FragColor = texture(cubemapSampler, texCoord_v);
+    FragColor = texture(cubemapSampler, texCoord_v) * 0.7;
 }
