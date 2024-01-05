@@ -76,14 +76,29 @@ public:
     void ProcessKeyboardMovement(Camera_Movement direction, float deltaTime)
     {
         float velocity = this->MovementSpeed * deltaTime;
+
+        // Calculate the movement vector based on the direction
+        glm::vec3 movement = glm::vec3(0.0f);
+
         if (direction == FORWARD)
-            this->Position += glm::normalize(glm::vec3(this->Front.x, 0.0f, this->Front.z)) * velocity; // Move only along x and z axes
-        if (direction == BACKWARD)
-            this->Position -= glm::normalize(glm::vec3(this->Front.x, 0.0f, this->Front.z)) * velocity; // Move only along x and z axes
-        if (direction == LEFT)
-            this->Position -= this->Right * velocity;
-        if (direction == RIGHT)
-            this->Position += this->Right * velocity;
+            movement = glm::normalize(this->Front) * velocity;
+        else if (direction == BACKWARD)
+            movement = -glm::normalize(this->Front) * velocity;
+        else if (direction == LEFT)
+            movement = -glm::normalize(glm::cross(this->Front, this->Up)) * velocity;
+        else if (direction == RIGHT)
+            movement = glm::normalize(glm::cross(this->Front, this->Up)) * velocity;
+
+        // Calculate the new position by adding the movement vector
+        glm::vec3 newPosition = this->Position + movement;
+
+        // Clamp only x and z coordinates within the square boundaries
+        newPosition.x = glm::clamp(newPosition.x, -16.0f, 36.0f);
+        newPosition.z = glm::clamp(newPosition.z, -57.0f, 56.0f);
+
+        // Update the camera position with the clamped x and z coordinates
+        this->Position.x = newPosition.x;
+        this->Position.z = newPosition.z;
     }
 
     void ProcessKeyboardRotation(float YawRot, float PitchRot, float deltaTime, GLboolean constrainPitch = true)
