@@ -178,9 +178,9 @@ int main(int argc, char* argv[])
 // ###########################################
 
 // ######## Setup Background CubeMap Shaders ############
-//    char Background_CubeMap_Vertex_Shader_file[128] = PATH_TO_SHADERS"/Background_CubeMap_Vertex_Shader.vert";
-//    char Background_CubeMap_Fragment_Shader_file[128] = PATH_TO_SHADERS"/Background_CubeMap_Fragment_Shader.frag";
-//	Shader cubeMapShader = Shader(Background_CubeMap_Vertex_Shader_file, Background_CubeMap_Fragment_Shader_file);
+    char Background_CubeMap_Vertex_Shader_file[128] = PATH_TO_SHADERS"/Background_CubeMap_Vertex_Shader.vert";
+    char Background_CubeMap_Fragment_Shader_file[128] = PATH_TO_SHADERS"/Background_CubeMap_Fragment_Shader.frag";
+	Shader cubeMapShader = Shader(Background_CubeMap_Vertex_Shader_file, Background_CubeMap_Fragment_Shader_file);
 // ###########################################
 
 // ######## Setup Room Shaders ############
@@ -205,6 +205,10 @@ int main(int argc, char* argv[])
 		}
 		};
 // ###########################################
+
+    char pathCube[] = PATH_TO_OBJECTS "/cube.obj";
+    Object cubeMap(pathCube);
+    cubeMap.makeObject(cubeMapShader);
 
     char pathRoom[] = PATH_TO_OBJECTS"/room/room_full.obj";
     Object room(pathRoom);
@@ -305,36 +309,37 @@ int main(int argc, char* argv[])
     Room_Shader.setFloat("lights[7].quadratic", 0.07);
 
 
-	// give texture to background (cubmap)
-	GLuint cubeMapTexture;
-	glGenTextures(1, &cubeMapTexture);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
+    GLuint cubeMapTexture;
+    glGenTextures(1, &cubeMapTexture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
 
-	// texture parameters
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // texture parameters
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	std::string pathToCubeMap = PATH_TO_TEXTURE"/cubemaps/Night/";
+    //stbi_set_flip_vertically_on_load(true);
 
-	std::map<std::string, GLenum> facesToLoad = {
-		{pathToCubeMap + "posx.png",GL_TEXTURE_CUBE_MAP_POSITIVE_X},
-		{pathToCubeMap + "posy.png",GL_TEXTURE_CUBE_MAP_POSITIVE_Y},
-		{pathToCubeMap + "posz.png",GL_TEXTURE_CUBE_MAP_POSITIVE_Z},
-		{pathToCubeMap + "negx.png",GL_TEXTURE_CUBE_MAP_NEGATIVE_X},
-		{pathToCubeMap + "negy.png",GL_TEXTURE_CUBE_MAP_NEGATIVE_Y},
-		{pathToCubeMap + "negz.png",GL_TEXTURE_CUBE_MAP_NEGATIVE_Z},
-	};
-	//load the six faces
-	for (std::pair<std::string, GLenum> pair : facesToLoad) {
-		loadCubemapFace(pair.first.c_str(), pair.second);
-	}
+    std::string pathToCubeMap = PATH_TO_TEXTURE "/cubemaps/Night/";
+
+    std::map<std::string, GLenum> facesToLoad = {
+            {pathToCubeMap + "px.png",GL_TEXTURE_CUBE_MAP_POSITIVE_X},
+            {pathToCubeMap + "py.png",GL_TEXTURE_CUBE_MAP_POSITIVE_Y},
+            {pathToCubeMap + "pz.png",GL_TEXTURE_CUBE_MAP_POSITIVE_Z},
+            {pathToCubeMap + "nx.png",GL_TEXTURE_CUBE_MAP_NEGATIVE_X},
+            {pathToCubeMap + "ny.png",GL_TEXTURE_CUBE_MAP_NEGATIVE_Y},
+            {pathToCubeMap + "nz.png",GL_TEXTURE_CUBE_MAP_NEGATIVE_Z},
+    };
+    //load the six faces
+    for (std::pair<std::string, GLenum> pair : facesToLoad) {
+        loadCubemapFace(pair.first.c_str(), pair.second);
+    }
 
 
-	glfwSwapInterval(1);
+    glfwSwapInterval(1);
 	//Rendering
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetKeyCallback(window, key_callback);
@@ -349,10 +354,14 @@ int main(int argc, char* argv[])
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-		// initialize rendering (send parameters to the shader)
-        Generic_Shader.use();
-        Generic_Shader.setMatrix4("V", view);
-        Generic_Shader.setMatrix4("P", perspective);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
+        cubeMapShader.setInteger("cubemapTexture", 0);
+        cubeMapShader.use();
+        cubeMapShader.setMatrix4("V", view);
+        cubeMapShader.setMatrix4("P", perspective);
+        cubeMapShader.setInteger("cubemapTexture", 0);
+        cubeMap.draw();
 
 
         Room_Shader.use();
