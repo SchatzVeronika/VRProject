@@ -26,7 +26,7 @@ float fov = 66.0f;
 bool isCursorCaptured = true; // Initially capture the cursor
 
 // Define camera attributes
-glm::vec3 cameraPosition = glm::vec3(0.0f, 16.0f, 30.0f);
+glm::vec3 cameraPosition = glm::vec3(-10.0f, 30.0f, 30.0f);
 float aspectRatio = 1.0;
 float nearPlane = 0.1f;
 float farPlane = 500.0f;
@@ -212,19 +212,6 @@ void processSelectedMeeple(GLFWwindow* window, std::vector<Object>& Brightmeeple
 		bool no_new_found = true;
 		bool break_it = true;
 		while (no_new_found) {
-
-			/*
-			for (int i = 0; i < meeples.size(); i++) {
-				if (!meeples[i].boardEnd_reached)
-					break_it = false;
-
-			}
-
-			if (break_it)
-				std::cout << "no playable meeple (kings though)" << std::endl;
-				break;
-
-			*/
 			index++;
 
 			index = index % meeples.size();
@@ -767,7 +754,7 @@ int main(int argc, char* argv[])
     char pathRoom[] = PATH_TO_OBJECTS"/room/room_fixed.obj";
     Object room(pathRoom);
     room.makeObject(Room_Shader, false);
-    room.model = glm::scale(room.model, glm::vec3(0.5, 0.5, 0.5));
+    room.model = glm::scale(room.model, glm::vec3(0.99, 0.99, 0.99));
     room.position = glm::vec3(7.0, -5.0, 10.0);
     room.model = glm::translate(room.model, room.position);
 

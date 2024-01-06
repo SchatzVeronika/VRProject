@@ -19,7 +19,7 @@ enum Camera_Movement {
 // Default camera values
 const float YAW = -90.0f;
 const float PITCH = 0.0f;
-const float SPEED = 2.5f;
+const float SPEED = 4.5f;
 const float SENSITIVITY = 0.1f;
 const float ZOOM = 45.0f;
 
@@ -93,8 +93,8 @@ public:
         glm::vec3 newPosition = this->Position + movement;
 
         // Clamp only x and z coordinates within the square boundaries
-        newPosition.x = glm::clamp(newPosition.x, -16.0f, 36.0f);
-        newPosition.z = glm::clamp(newPosition.z, -57.0f, 56.0f);
+        newPosition.x = glm::clamp(newPosition.x, -30.0f, 70.0f);
+        newPosition.z = glm::clamp(newPosition.z, -110.0f, 115.0f);
 
         // Update the camera position with the clamped x and z coordinates
         this->Position.x = newPosition.x;
