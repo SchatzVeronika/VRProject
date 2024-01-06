@@ -1125,11 +1125,21 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
-//taken from https://learnopengl.com/Getting-started/Camera
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-	camera.ProcessMouseScroll((yoffset));
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    // Adjust fov based on the vertical scroll wheel movement
+    fov -= static_cast<float>(yoffset);
+
+    // Clamp the fov within a reasonable range
+    if (fov < 1.0f) {
+        fov = 1.0f;
+    } else if (fov > 120.0f) {
+        fov = 120.0f;
+    }
+
+    // Recalculate perspective matrix
+    perspective = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 }
+
 
 void processKeyboardCameraInput(GLFWwindow* window) {
     // Use the cameras class to change the parameters of the camera

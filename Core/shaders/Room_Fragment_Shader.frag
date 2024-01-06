@@ -40,7 +40,7 @@ void main() {
         vec3 L = normalize(lights[i].light_pos - v_frag_coord);
         float specular = blinnPhongSpecular(N, L, V) * 3;
         float diffuse = lights[i].diffuse_strength * max(dot(N, L), 0.0) * 2;
-        float distance = length(lights[i].light_pos - v_frag_coord) * 0.2;
+        float distance = length(lights[i].light_pos - v_frag_coord) * 0.15;
         float attenuation = 1.0 / (lights[i].constant + lights[i].linear * distance + lights[i].quadratic * distance * distance);
         totalLight += attenuation * (lights[i].ambient_strength + (diffuse + specular));
     }
