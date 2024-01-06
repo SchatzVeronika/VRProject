@@ -886,10 +886,10 @@ int main(int argc, char* argv[])
 
     Glow_Shader.use();
     Glow_Shader.setVector3f("light.position", glm::vec3(13.0, 40.0, -78.0));
-    Glow_Shader.setFloat("shininess", 2.0f);
-    Glow_Shader.setFloat("light.ambient_strength", 0.5f);
-    Glow_Shader.setFloat("light.diffuse_strength", 0.3f);
-    Glow_Shader.setFloat("light.specular_strength", 0.5f);
+    Glow_Shader.setFloat("shininess", 32.0f);
+    Glow_Shader.setFloat("light.ambient_strength", 0.3f);
+    Glow_Shader.setFloat("light.diffuse_strength", 0.8f);
+    Glow_Shader.setFloat("light.specular_strength", 0.9f);
     Glow_Shader.setFloat("light.constant", 1.0);
     Glow_Shader.setFloat("light.linear", 0.14);
     Glow_Shader.setFloat("light.quadratic", 0.07);

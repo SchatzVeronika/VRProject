@@ -50,11 +50,11 @@ void main() {
 
     float diffuse = light.diffuse_strength * max(dot(N, L), 0.0);
     float distance = length(light.light_pos - v_frag_coord);
-    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * distance * distance) * 10.0;
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * distance * distance) * 2.0;
     float calculatedLight = light.ambient_strength + attenuation * (diffuse + specular);
 
     vec3 textureColor = texture(ourTexture, TexCoord).xyz;
-    vec3 glowColor = vec3(0.0, 1.0, 0.0); // Set the glow color (yellow in this example)
+    vec3 glowColor = vec3(0.0, 0.0, 1.0); // Set the glow color
     float glowIntensity = 2.0; // Adjust this intensity as needed
 
     // Refraction calculation
