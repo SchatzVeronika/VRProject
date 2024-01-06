@@ -29,10 +29,12 @@ bool isCursorCaptured = true; // Initially capture the cursor
 glm::vec3 cameraPosition = glm::vec3(0.0f, 16.0f, 30.0f);
 float aspectRatio = 1.0;
 float nearPlane = 0.1f;
-float farPlane = 1000.0f;
+float farPlane = 500.0f;
 
 // Create camera and projection matrix
 Camera camera(cameraPosition);
+glm::mat4 view = camera.GetViewMatrix();
+glm::mat4 perspective = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 
 // Function Declarations
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -189,6 +191,12 @@ int main(int argc, char* argv[])
     Shader Room_Shader = Shader(Room_Vertex_Shader_file, Room_Fragment_Shader_file);
 // ###########################################
 
+// ######## Setup Refractive Shaders ############
+    char Refractive_Vertex_Shader_file[128] = PATH_TO_SHADERS"/Refractive_Vertex_Shader.vert";
+    char Refractive_Fragment_Shader_file[128] = PATH_TO_SHADERS"/Refractive_Fragment_Shader.frag";
+    Shader Refractive_Shader = Shader(Refractive_Vertex_Shader_file, Refractive_Fragment_Shader_file);
+// ###########################################
+
 
 // ######## FPS Counter #######################
 	double prev = 0;
@@ -206,6 +214,10 @@ int main(int argc, char* argv[])
 		};
 // ###########################################
 
+    char pathGlobe[] = PATH_TO_OBJECTS"/room/globe_extruded.obj";
+    Object globe(pathGlobe);
+    globe.makeObject(Refractive_Shader);
+
     char pathCube[] = PATH_TO_OBJECTS "/cube.obj";
     Object cubeMap(pathCube);
     cubeMap.makeObject(cubeMapShader);
@@ -217,16 +229,9 @@ int main(int argc, char* argv[])
     room.position = glm::vec3(7.0, -5.0, 10.0);
     room.model = glm::translate(room.model, room.position);
 
-    char pathGlobe[] = PATH_TO_OBJECTS"/room/globe.obj";
-    Object globe(pathGlobe);
-    globe.makeObject(Room_Shader, false);
 
-
-
-    glm::mat4 view = camera.GetViewMatrix();
-    glm::mat4 perspective = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
-
-	// Light:
+    //Rendering
+	// Room Light:
 // Define multiple light positions
     std::vector<glm::vec3> lightPositions = {
             glm::vec3(-5.0f, 25.0f, 10.0f),
@@ -312,7 +317,7 @@ int main(int argc, char* argv[])
     Room_Shader.setFloat("lights[7].linear", 0.14);
     Room_Shader.setFloat("lights[7].quadratic", 0.07);
 
-
+//Cubemap loading
     GLuint cubeMapTexture;
     glGenTextures(1, &cubeMapTexture);
     glActiveTexture(GL_TEXTURE0);
@@ -342,7 +347,8 @@ int main(int argc, char* argv[])
         loadCubemapFace(pair.first.c_str(), pair.second);
     }
 
-
+    Refractive_Shader.setFloat("refractionIndice", 1.7f);
+    
     glfwSwapInterval(1);
 	//Rendering
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -358,14 +364,12 @@ int main(int argc, char* argv[])
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
-        cubeMapShader.setInteger("cubemapTexture", 0);
         cubeMapShader.use();
         cubeMapShader.setMatrix4("V", view);
         cubeMapShader.setMatrix4("P", perspective);
         cubeMapShader.setInteger("cubemapTexture", 0);
         cubeMap.draw();
+        glDepthFunc(GL_LESS);
 
 
         Room_Shader.use();
@@ -374,9 +378,6 @@ int main(int argc, char* argv[])
         Room_Shader.setMatrix4("V", view);
         Room_Shader.setMatrix4("P", perspective);
         Room_Shader.setVector3f("u_view_pos", camera.Position);
-
-        globe.draw();
-
         glDepthFunc(GL_LEQUAL);
         room.draw();
 
