@@ -26,7 +26,7 @@ float fov = 66.0f;
 bool isCursorCaptured = true; // Initially capture the cursor
 
 // Define camera attributes
-glm::vec3 cameraPosition = glm::vec3(-10.0f, 30.0f, 30.0f);
+glm::vec3 cameraPosition = glm::vec3(0.0f, 30.0f, 80.0f);
 float aspectRatio = 1.0;
 float nearPlane = 0.1f;
 float farPlane = 500.0f;
