@@ -675,7 +675,7 @@ int main(int argc, char* argv[])
 // ######## Setup Refractive Shaders ############
     char Refractive_Vertex_Shader_file[128] = PATH_TO_SHADERS"/Refractive_Vertex_Shader.vert";
     char Refractive_Fragment_Shader_file[128] = PATH_TO_SHADERS"/Refractive_Fragment_Shader.frag";
-    Shader Refractive_Shader = Shader(Refractive_Vertex_Shader_file, Refractive_Fragment_Shader_file);
+    Shader Glow_Shader = Shader(Refractive_Vertex_Shader_file, Refractive_Fragment_Shader_file);
 // ###########################################
 
 
@@ -747,16 +747,26 @@ int main(int argc, char* argv[])
         Brightmeeples.push_back(Brightmeeple);
     }
 
-    char pathCube[] = PATH_TO_OBJECTS "/cube.obj";
-    Object cubeMap(pathCube);
-    cubeMap.makeObject(cubeMapShader);
-
     char pathRoom[] = PATH_TO_OBJECTS"/room/room_fixed.obj";
     Object room(pathRoom);
     room.makeObject(Room_Shader, false);
     room.model = glm::scale(room.model, glm::vec3(0.99, 0.99, 0.99));
     room.position = glm::vec3(7.0, -5.0, 10.0);
     room.model = glm::translate(room.model, room.position);
+
+    char path_glass_texture[] = PATH_TO_TEXTURE"/glass.jpeg";
+    GLuint glass_texture = loadTexture(path_glass_texture);
+    char pathGlobe[] = PATH_TO_OBJECTS"/room/globe_relocated.obj";
+    Object globe(pathGlobe);
+    globe.makeObject(Glow_Shader);
+    globe.model = glm::scale(globe.model, glm::vec3(0.99, 0.99, 0.99));
+    globe.position = glm::vec3(13.0, 15.0, -78.0);
+    globe.model = glm::translate(globe.model, globe.position);
+
+
+    char pathCube[] = PATH_TO_OBJECTS "/cube.obj";
+    Object cubeMap(pathCube);
+    cubeMap.makeObject(cubeMapShader);
 
 
     //Rendering
@@ -854,15 +864,16 @@ int main(int argc, char* argv[])
     Room_Shader.setFloat("lights[8].constant", 1.0);
     Room_Shader.setFloat("lights[8].linear", 0.14);
     Room_Shader.setFloat("lights[8].quadratic", 0.07);
+    
 
     // Board light:
-    glm::vec3 light_pos = glm::vec3(0.0, 4.0, 1.3);
+    glm::vec3 light_pos = glm::vec3(0.0, 10.0, 1.3);
     glm::vec3 light_col = glm::vec3(1.0, 0.0, 0.0);
 
-    float ambient = 0.5;
-    float diffuse = 0.9;
-    float specular = 0.4;
-    float shininess = 2.0;
+    float ambient = 0.8f;
+    float diffuse = 0.7f;
+    float specular = 0.7f;
+    float shininess = 32.0f;
 
     Generic_Shader.use();
     Generic_Shader.setFloat("shininess", shininess);
@@ -872,6 +883,16 @@ int main(int argc, char* argv[])
     Generic_Shader.setFloat("light.constant", 1.0);
     Generic_Shader.setFloat("light.linear", 0.14);
     Generic_Shader.setFloat("light.quadratic", 0.07);
+
+    Glow_Shader.use();
+    Glow_Shader.setVector3f("light.position", glm::vec3(13.0, 40.0, -78.0));
+    Glow_Shader.setFloat("shininess", 2.0f);
+    Glow_Shader.setFloat("light.ambient_strength", 0.5f);
+    Glow_Shader.setFloat("light.diffuse_strength", 0.3f);
+    Glow_Shader.setFloat("light.specular_strength", 0.5f);
+    Glow_Shader.setFloat("light.constant", 1.0);
+    Glow_Shader.setFloat("light.linear", 0.14);
+    Glow_Shader.setFloat("light.quadratic", 0.07);
 
 //Cubemap loading
     GLuint cubeMapTexture;
@@ -902,8 +923,6 @@ int main(int argc, char* argv[])
     for (std::pair<std::string, GLenum> pair : facesToLoad) {
         loadCubemapFace(pair.first.c_str(), pair.second);
     }
-
-    //Refractive_Shader.setFloat("refractionIndice", 1.7f);
 
 
     // mark first pawn as selected
@@ -991,6 +1010,7 @@ int main(int argc, char* argv[])
 			}
 
 		}
+
 		// initialize rendering (send parameters to the shader)
         Generic_Shader.use();
         Generic_Shader.setMatrix4("V", view);
@@ -1041,14 +1061,6 @@ int main(int argc, char* argv[])
             }
         }
 
-        cubeMapShader.use();
-        cubeMapShader.setMatrix4("V", view);
-        cubeMapShader.setMatrix4("P", perspective);
-        cubeMapShader.setInteger("cubemapTexture", 0);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
-        cubeMap.draw();
-        glDepthFunc(GL_LESS);
 
 
         Room_Shader.use();
@@ -1060,6 +1072,24 @@ int main(int argc, char* argv[])
         glDepthFunc(GL_LEQUAL);
         room.draw();
 
+        Glow_Shader.use();
+        Glow_Shader.setMatrix4("M", globe.model);
+        Glow_Shader.setMatrix4("itM", glm::transpose(glm::inverse(globe.model)));
+        Glow_Shader.setMatrix4("V", view);
+        Glow_Shader.setMatrix4("P", perspective);
+        Glow_Shader.setVector3f("u_view_pos", camera.Position);
+        Generic_Shader.setInteger("ourTexture", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, glass_texture);
+        glDepthFunc(GL_LEQUAL);
+        globe.draw();
+
+        cubeMapShader.use();
+        cubeMapShader.setMatrix4("V", view);
+        cubeMapShader.setMatrix4("P", perspective);
+        cubeMapShader.setInteger("cubemapTexture", 0);
+        cubeMap.draw();
+        glDepthFunc(GL_LESS);
 
 		fps(now);
 		glfwSwapBuffers(window);

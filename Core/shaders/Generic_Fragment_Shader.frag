@@ -9,7 +9,7 @@ in vec2 TexCoord;
 
 uniform vec3 u_view_pos;
 
-// establish light
+// Establish light
 struct Light {
     vec3 light_pos;
     float ambient_strength;
@@ -44,15 +44,15 @@ void main() {
     float calculatedLight = light.ambient_strength + attenuation * (diffuse + specular);
 
     vec3 textureColor = texture(ourTexture, TexCoord).xyz;
-    vec3 materialColour = vec3(1.0, 0.5, 0.0); // Orange color
+    vec3 glowColor = vec3(1.0, 1.0, 0.0); // Set the glow color (yellow in this example)
+    float glowIntensity = 8.0; // Adjust this intensity as needed
 
-    vec3 finalColor = vec3(1.0);
-
+    // If selected, emit glow as a light source
     if (selected == 1.0) {
-        finalColor = mix(materialColour, textureColor, calculatedLight);
+        // Emit glow color as a light source
+        FragColor = vec4(glowColor * glowIntensity, 1.0);
     } else {
-        finalColor = textureColor * calculatedLight;
+        // For non-selected fragments, apply calculated light
+        FragColor = vec4(textureColor * calculatedLight, 1.0);
     }
-
-    FragColor = vec4(finalColor, 1.0);
 }
