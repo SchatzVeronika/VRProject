@@ -763,23 +763,24 @@ int main(int argc, char* argv[])
 	// Room Light:
 // Define multiple light positions
     std::vector<glm::vec3> lightPositions = {
-            glm::vec3(-5.0f, 25.0f, 10.0f),
-            glm::vec3(-5.0f, 25.0f, 31.0f),
-            glm::vec3(33.0f, 25.0f, 12.0f),
-            glm::vec3(33.0f, 25.0f, 33.0f),
-            glm::vec3(35.0f, 25.0f, -10.0f),
-            glm::vec3(35.0f, 25.0f, -31.0f),
-            glm::vec3(35.0f, 25.0f, -57.0f),
-            glm::vec3(14.0f, 25.0f, 32.0f),
+            glm::vec3(-8.0f, 65.0f, 20.0f),
+            glm::vec3(-8.0f, 65.0f, 20.0f),
+            glm::vec3(-8.0f, 65.0f, 60.9f),
+            glm::vec3(28.0f, 65.0f, 60.9f),
+            glm::vec3(69.0f, 65.0f, 60.9f),
+            glm::vec3(69.0f, 65.0f, 20.0f),
+            glm::vec3(69.0f, 65.0f, -20.0f),
+            glm::vec3(69.0f, 65.0f, -63.0f),
+            glm::vec3(69.0f, 65.0f, -111.0f),
     };
     float room_ambient = 0.00001f;
     float room_diffuse = 0.99f;
     float room_specular = 0.0001f;
 
-    glm::vec3 materialColour = glm::vec3(0.9f, 0.9f, 0.9f);
+    glm::vec3 materialColour = glm::vec3(0.5f, 0.5f, 0.5f);
 
     Room_Shader.use();
-    Room_Shader.setFloat("shininess", 0.2f);
+    Room_Shader.setFloat("shininess", 0.92f);
     Room_Shader.setVector3f("materialColour", materialColour);
 
     Room_Shader.setVector3f("lights[0].light_pos", lightPositions[0]);
@@ -845,6 +846,14 @@ int main(int argc, char* argv[])
     Room_Shader.setFloat("lights[7].constant", 1.0);
     Room_Shader.setFloat("lights[7].linear", 0.14);
     Room_Shader.setFloat("lights[7].quadratic", 0.07);
+
+    Room_Shader.setVector3f("lights[8].light_pos", lightPositions[8]);
+    Room_Shader.setFloat("lights[8].ambient_strength", room_ambient);
+    Room_Shader.setFloat("lights[8].diffuse_strength", room_diffuse);
+    Room_Shader.setFloat("lights[8].specular_strength", room_specular);
+    Room_Shader.setFloat("lights[8].constant", 1.0);
+    Room_Shader.setFloat("lights[8].linear", 0.14);
+    Room_Shader.setFloat("lights[8].quadratic", 0.07);
 
     // Board light:
     glm::vec3 light_pos = glm::vec3(0.0, 4.0, 1.3);
