@@ -1,22 +1,22 @@
 # Delegating tasks:
 ## Veronika:
-- [ ] Geometry shader explosion of a selected pawn
-- [ ] Ray tracing effects
+- [NO] Geometry shader explosion of a selected pawn
+- [NO] Ray tracing effects
 - [x] Pawn selection and movement
-- [ ] Game logic
-- [ ] Better lightning
+- [x] Game logic
+- [x] Better lightning
 
 ## Igors:
 - [x] New cubemap + new floor
-- [ ] Bullet library / Physics implementation
+- [KIND OF] Bullet library / Physics implementation
 - [x] Move shaders from main.cpp to /shaders
 - [x] Find a small checkers board / Create small boxes and merge them to represent the board (4x4)
-- [ ] Mouse scrolling
+- [x] Mouse scrolling
 
 ## Extra
-- [ ] Different texture for meeples (two colored)
-- [ ] Reflective/Refractive objects
-- [ ] Compute shaders
+- [X] Different texture for meeples (two colored)
+- [X] Reflective/Refractive objects
+- [NO] Compute shaders
 
 
 ## Key Inputs
