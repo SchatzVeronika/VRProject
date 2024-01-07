@@ -17,8 +17,6 @@ const int window_width = 800;
 const int window_height = 800;
 
 bool firstMouse = true; // for mouse_callback
-float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right, so we initially rotate a bit to the left.
-float pitch = 0.0f;
 float lastX = 800.0f / 2.0;
 float lastY = 600.0 / 2.0;
 int i_row = 0;
@@ -123,14 +121,10 @@ GLuint loadTexture(const char* path) {
 
 // some global variables
 bool nKeyPressed = false;
-bool lKeyPressed = false;
 bool fKeyPressed = false;
 bool enterKeyPressed = false;
-// storing the selected indices
-int selectedMeeple_old = 0;
 
 std::string current_Team = "bright";
-int dbug_counter = 0;
 bool endGame = false;
 bool unpermitted_move = false;
 
@@ -189,25 +183,9 @@ void processSelectedMeeple(GLFWwindow* window, std::vector<Object>& Brightmeeple
 			meeple.selected = 0.0;
 		}
 	}
-
-	/*for (int i = 0; i < meeples.size(); i++) {
-		if (meeples[i].selected == 1.0) {
-			index = i;
-		}
-	}*/
 	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS && !nKeyPressed) {			// select next pawn in array pawns and unselect the current pawn
-		/*if (index < meeples.size() - 1 && !meeples[index + 1].boardEnd_reached) {
-			meeples[index].selected = 0.0;
-			meeples[index + 1].selected = 1.0;
-			std::cout << "test1" << std::endl;
-		}
-		else if (!meeples[0].boardEnd_reached) {
-			meeples[0].selected = 1.0;		// start from beginning or array
-			std::cout << "test1" << std::endl;
-		}*/
 		nKeyPressed = true;
 
-		//
 		meeples[index].selected = 0.0;
 		bool no_new_found = true;
 		bool break_it = true;
@@ -222,14 +200,10 @@ void processSelectedMeeple(GLFWwindow* window, std::vector<Object>& Brightmeeple
 			}
 			//
 		}
-
-
 	}
-
 	else if (glfwGetKey(window, GLFW_KEY_N) == GLFW_RELEASE) {
 		nKeyPressed = false;  // Reset the n key
 	}
-
 }
 
 void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& board, std::vector<Object>& Brightmeeples, std::vector<Object>& Darkmeeples) {
@@ -285,12 +259,10 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !fKeyPressed) {
         i_row = (i_row + 1) % 2;	// alternate between the two indices
         fKeyPressed = true;
-
     }
     else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE) {
         fKeyPressed = false;  // Reset the f key
     }
-
     // select new field depending on current field
     if (next_row[0] >= 0 && next_row[0] < board.size() && next_row[1] >= 0 && next_row[1] < board.size() &&		 // check if both indices of next_row are inside the bounds of the board
         !(board[next_row[i_row]][next_column].occupied && (next_row[i_row] == 0 || next_row[i_row] == board.size() - 1))) {		// check if meeple at edge of board
@@ -309,7 +281,6 @@ void processSelectedField(GLFWwindow* window, std::vector<std::vector<Object>>& 
         i_row = next_row[1];
         board[i_row][next_column].selected = 1.0;
     }
-
 }
 
 void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std::vector<Object>& Brightmeeples, std::vector<Object>& Darkmeeples) {
@@ -330,13 +301,10 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
 
     if (meeples[index_pawn].position.z > cube_pos.z) {
         direction = "up";
-
     }
     if (meeples[index_pawn].position.z < cube_pos.z) {
         direction = "down";
-
     }
-
     // manage occupied fields
     for (int i = 0; i < board.size(); i++) {
         for (int j = 0; j < board[1].size(); j++) {
@@ -366,89 +334,60 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
 
     bool break_free123 = false;
 
-
     // check if kick possible for brightmeeple
     if (current_Team == "bright") {
-
         //loop through all darkmeeples
         for (int i = 0; i < Darkmeeples.size(); i++) {
-
             // check if enemy there
             if (Darkmeeples[i].position.x == cube_pos.x && Darkmeeples[i].position.z == cube_pos.z) {
-
                 //check if behind is still inside the board
                 if (board_i - 1 >= 0 && board_i + 1 < board.size() && board_j - 1 >= 0 && board_j + 1 < board[0].size()) {
-
                     // check if behind free
                     if (direction == "up" && !board[board_i - 1][board_j + 1].occupied ||
                         direction == "down" && !board[board_i + 1][board_j + 1].occupied) {
-
-
                         // move piece special
                         normal_move = false;
-
                         if (direction == "up") {
                             field_to_move_to = board[board_i - 1][board_j + 1].position;
-
                         }
                         if (direction == "down") {
                             field_to_move_to = board[board_i + 1][board_j + 1].position;
-
                         }
-
                         // remove jumped over piece
                         Darkmeeples.erase(Darkmeeples.begin() + i);
                         break_free123 = true;
-
-
                     }
                 }
-
             }
-
             if (break_free123) {
                 break;
             }
         }
     }
-
     // check if kick possible for darkmeeple
     if (current_Team == "dark") {
-
         //loop through all darkmeeples
         for (int i = 0; i < Brightmeeples.size(); i++) {
-
             // check if enemy there
             if (Brightmeeples[i].position.x == cube_pos.x && Brightmeeples[i].position.z == cube_pos.z) {
-
                 //check if behind is still inside the board
                 if (board_i - 1 >= 0 && board_i + 1 < board.size() && board_j - 1 >= 0 && board_j + 1 < board[0].size()) {
-
                     // check if behind free
                     if (direction == "up" && !board[board_i - 1][board_j - 1].occupied ||
                         direction == "down" && !board[board_i + 1][board_j - 1].occupied) {
-
-
                         // move piece special
                         normal_move = false;
-
                         if (direction == "up") {
                             field_to_move_to = board[board_i - 1][board_j - 1].position;
-
                         }
                         if (direction == "down") {
                             field_to_move_to = board[board_i + 1][board_j - 1].position;
-
                         }
-
                         // remove jumped over piece
                         Brightmeeples.erase(Brightmeeples.begin() + i);
                         break_free123 = true;
-
-
                     }
                 }
-
             }
 
             if (break_free123) {
@@ -484,26 +423,18 @@ void moveMeeple(GLFWwindow* window, std::vector<std::vector<Object>>& board, std
     }
 
     if (!unpermitted_move) {
-
-
-
         // normal move
         meeples[index_pawn].position = glm::vec3(field_to_move_to.x, field_to_move_to.y + 1.2, field_to_move_to.z);	// update position of meeple
         meeples[index_pawn].model = glm::translate(glm::mat4(1.0f), meeples[index_pawn].position);		// move meeple to the new position
-
         // normal end turn check
         if (meeples[index_pawn].position.x >= board[0][7].position.x || meeples[index_pawn].position.x <= board[0][0].position.x) {		// end of board reached
             meeples[index_pawn].boardEnd_reached = true;
         }
     }
-
 }
 
 void checkforwin(GLFWwindow* window, std::vector<Object>& Darkmeeples, std::vector<Object>& Brightmeeples) {
 	bool noWinPossible = false;
-
-
-
     // counts all meeples, if all have end reached = true ----> no win possible
     int brightmeeplecounter = 0;
     for (auto& Brightmeeple : Brightmeeples) {
@@ -527,7 +458,6 @@ void checkforwin(GLFWwindow* window, std::vector<Object>& Darkmeeples, std::vect
 
     if (darkmeeplecounter == Darkmeeples.size())
         noWinPossible = true;
-
 
 	// different win states
 	if (Darkmeeples.empty()) {
@@ -564,17 +494,14 @@ void processnextTurn(GLFWwindow* window, std::vector<Object>& Darkmeeples, std::
         for (int i = 0; i < Brightmeeples.size(); i++) {
             Brightmeeples[i].selected = 0.0;
         }
-
 		for (int i = 0; i < Darkmeeples.size(); i++) {
 			if (!Darkmeeples[i].boardEnd_reached) {
 				Darkmeeples[i].selected = 1.0;
 				break;
 			}
 		}
-
 		current_Team = "dark";
 		// fix end
-
 	}
 	else if (current_Team == "dark") {
 		// Darkmeeples[currentMeeple].selected = 0.0;
@@ -587,19 +514,15 @@ void processnextTurn(GLFWwindow* window, std::vector<Object>& Darkmeeples, std::
         for (int i = 0; i < Darkmeeples.size(); i++) {
             Darkmeeples[i].selected = 0.0;
         }
-
         for (int i = 0; i < Brightmeeples.size(); i++) {
             if (!Brightmeeples[i].boardEnd_reached) {
                 Brightmeeples[i].selected = 1.0;
                 break;
             }
         }
-
         current_Team = "bright";
         // fix end
-
     }
-
 }
 
 int main(int argc, char* argv[])
@@ -619,7 +542,6 @@ int main(int argc, char* argv[])
 	//create a debug context to help with Debugging
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 #endif
-
 
 	//Create the window
 	GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Main_Window", nullptr, nullptr);
@@ -690,7 +612,7 @@ int main(int argc, char* argv[])
 			prev = now;
 			const double fpsCount = (double)deltaFrame / deltaTime;
 			deltaFrame = 0;
-			// std::cout << "\r FPS: " << fpsCount;
+			std::cout << "\r FPS: " << fpsCount;
 		}
 		};
 // ###########################################
@@ -958,7 +880,7 @@ int main(int argc, char* argv[])
                 break;
             }
             if (board[j][i].color == "black") {
-                std::cout << i <<j << std::endl;
+                //std::cout << i <<j << std::endl;
                 glm::vec3 cube_pos = board[j][i].getPos();
                 Darkmeeples[i_meeple].position = glm::vec3(cube_pos.x, cube_pos.y + 1.2, cube_pos.z);
                 Darkmeeples[i_meeple].model = glm::translate(glm::mat4(1.0f), Darkmeeples[i_meeple].position);
@@ -1060,8 +982,6 @@ int main(int argc, char* argv[])
                 board[i][j].draw();
             }
         }
-
-
 
         Room_Shader.use();
         Room_Shader.setMatrix4("M", room.model);
