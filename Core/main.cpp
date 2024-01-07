@@ -655,9 +655,9 @@ int main(int argc, char* argv[])
 
 
 // ######## Setup Generic Shaders ############
-    char Generic_Fragment_Shader_file[128] = PATH_TO_SHADERS"/Generic_Fragment_Shader.frag";
-    char Generic_Vertex_Shader_file[128] = PATH_TO_SHADERS"/Generic_Vertex_Shader.vert";
-    Shader Generic_Shader = Shader(Generic_Vertex_Shader_file, Generic_Fragment_Shader_file);
+    char Checkers_Fragment_Shader_file[128] = PATH_TO_SHADERS"/Checkers_Fragment_Shader.frag";
+    char Checkers_Vertex_Shader_file[128] = PATH_TO_SHADERS"/Checkers_Vertex_Shader.vert";
+    Shader Checkers_Shader = Shader(Checkers_Vertex_Shader_file, Checkers_Fragment_Shader_file);
 // ###########################################
 
 // ######## Setup Background CubeMap Shaders ############
@@ -714,7 +714,7 @@ int main(int argc, char* argv[])
 			Object field(pathBoard);
 			field.position = glm::vec3(2.0 * j, 0.0, 2.0 * i);
 			field.model = glm::translate(field.model, field.position);
-			field.makeObject(Generic_Shader);
+			field.makeObject(Checkers_Shader);
 			if ((i + j) % 2 == 0) {
 				field.color = "white";
 			}
@@ -733,7 +733,7 @@ int main(int argc, char* argv[])
         Object Darkmeeple(path_meeple);
         Darkmeeple.color = "dark";
         //Darkmeeple.model = glm::translate(Darkmeeple.model, glm::vec3(2.0*i, 2.0, 2.0));
-        Darkmeeple.makeObject(Generic_Shader);
+        Darkmeeple.makeObject(Checkers_Shader);
         Darkmeeples.push_back(Darkmeeple);
     }
     std::vector<Object> Brightmeeples;
@@ -743,7 +743,7 @@ int main(int argc, char* argv[])
         Object Brightmeeple(path_meeple);
         Brightmeeple.color = "bright";
         //Brightmeeple.model = glm::translate(Brightmeeple.model, glm::vec3(2.0 * i, 2.0, 2.0));
-        Brightmeeple.makeObject(Generic_Shader);
+        Brightmeeple.makeObject(Checkers_Shader);
         Brightmeeples.push_back(Brightmeeple);
     }
 
@@ -875,14 +875,14 @@ int main(int argc, char* argv[])
     float specular = 0.7f;
     float shininess = 32.0f;
 
-    Generic_Shader.use();
-    Generic_Shader.setFloat("shininess", shininess);
-    Generic_Shader.setFloat("light.ambient_strength", ambient);
-    Generic_Shader.setFloat("light.diffuse_strength", diffuse);
-    Generic_Shader.setFloat("light.specular_strength", specular);
-    Generic_Shader.setFloat("light.constant", 1.0);
-    Generic_Shader.setFloat("light.linear", 0.14);
-    Generic_Shader.setFloat("light.quadratic", 0.07);
+    Checkers_Shader.use();
+    Checkers_Shader.setFloat("shininess", shininess);
+    Checkers_Shader.setFloat("light.ambient_strength", ambient);
+    Checkers_Shader.setFloat("light.diffuse_strength", diffuse);
+    Checkers_Shader.setFloat("light.specular_strength", specular);
+    Checkers_Shader.setFloat("light.constant", 1.0);
+    Checkers_Shader.setFloat("light.linear", 0.14);
+    Checkers_Shader.setFloat("light.quadratic", 0.07);
 
     Globe_Shader.use();
     Globe_Shader.setVector3f("light.position", glm::vec3(13.0, 40.0, -78.0));
@@ -1012,30 +1012,30 @@ int main(int argc, char* argv[])
 		}
 
 		// initialize rendering (send parameters to the shader)
-        Generic_Shader.use();
-        Generic_Shader.setMatrix4("V", view);
-        Generic_Shader.setMatrix4("P", perspective);
-        Generic_Shader.setVector3f("light.light_pos", light_pos);
-        Generic_Shader.setVector3f("light.light_color", light_col);
-        Generic_Shader.setVector3f("u_view_pos", camera.Position);
+        Checkers_Shader.use();
+        Checkers_Shader.setMatrix4("V", view);
+        Checkers_Shader.setMatrix4("P", perspective);
+        Checkers_Shader.setVector3f("light.light_pos", light_pos);
+        Checkers_Shader.setVector3f("light.light_color", light_col);
+        Checkers_Shader.setVector3f("u_view_pos", camera.Position);
 
         for (auto& meeple : Brightmeeples) {
-            Generic_Shader.use();
-            Generic_Shader.setMatrix4("M", meeple.model);
-            //Generic_Shader.setMatrix4("itM", inverseModel);
-            Generic_Shader.setInteger("ourTexture", 0);
-            Generic_Shader.setFloat("selected", meeple.selected);
+            Checkers_Shader.use();
+            Checkers_Shader.setMatrix4("M", meeple.model);
+            //Checkers_Shader.setMatrix4("itM", inverseModel);
+            Checkers_Shader.setInteger("ourTexture", 0);
+            Checkers_Shader.setFloat("selected", meeple.selected);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, Brightmeeple_texture);
             glDepthFunc(GL_LEQUAL);
             meeple.draw();
         }
         for (auto& meeple : Darkmeeples) {
-            Generic_Shader.use();
-            Generic_Shader.setMatrix4("M", meeple.model);
-            //Generic_Shader.setMatrix4("itM", inverseModel);
-            Generic_Shader.setInteger("ourTexture", 0);
-            Generic_Shader.setFloat("selected", meeple.selected);
+            Checkers_Shader.use();
+            Checkers_Shader.setMatrix4("M", meeple.model);
+            //Checkers_Shader.setMatrix4("itM", inverseModel);
+            Checkers_Shader.setInteger("ourTexture", 0);
+            Checkers_Shader.setFloat("selected", meeple.selected);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, Darkmeeple_texture);
             glDepthFunc(GL_LEQUAL);
@@ -1045,10 +1045,10 @@ int main(int argc, char* argv[])
         // render the board
         for (int i = 0; i < board.size(); i++) {
             for (int j = 0; j < board.size(); j++) {
-                Generic_Shader.use();
-                Generic_Shader.setMatrix4("M", board[i][j].model);
-                Generic_Shader.setInteger("ourTexture", 0);
-                Generic_Shader.setFloat("selected", board[i][j].selected);
+                Checkers_Shader.use();
+                Checkers_Shader.setMatrix4("M", board[i][j].model);
+                Checkers_Shader.setInteger("ourTexture", 0);
+                Checkers_Shader.setFloat("selected", board[i][j].selected);
                 glActiveTexture(GL_TEXTURE0);
                 if (board[i][j].color == "white") {
                     glBindTexture(GL_TEXTURE_2D, Board_Texture_1);
