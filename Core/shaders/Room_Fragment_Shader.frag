@@ -12,7 +12,7 @@ struct Light {
     float ambient_strength;
     float diffuse_strength;
     float specular_strength;
-    float constant;
+    float constant; //attenuation factors
     float linear;
     float quadratic;
 };
@@ -25,19 +25,19 @@ uniform float shininess;
 uniform vec3 materialColour;
 
 float blinnPhongSpecular(vec3 N, vec3 L, vec3 V) {
-    vec3 H = normalize(L + V);
+    vec3 H = normalize(L + V); //half-vector
     float spec = pow(max(dot(N, H), 0.0), shininess);
     return light.specular_strength * spec;
 }
 
 void main() {
-    vec3 N = normalize(v_normal);
-    vec3 V = normalize(u_view_pos - v_frag_coord);
+    vec3 N = normalize(v_normal); //normalized interpolated normal vector
+    vec3 V = normalize(u_view_pos - v_frag_coord); //normalized view direction vector
 
     vec3 totalLight = vec3(0.0); // Accumulator for total light
 
     for (int i = 0; i < MAX_LIGHTS; ++i) {
-        vec3 L = normalize(lights[i].light_pos - v_frag_coord);
+        vec3 L = normalize(lights[i].light_pos - v_frag_coord); //normalized light source vector
         float specular = blinnPhongSpecular(N, L, V) * 3;
         float diffuse = lights[i].diffuse_strength * max(dot(N, L), 0.0) * 2;
         float distance = length(lights[i].light_pos - v_frag_coord) * 0.15;
