@@ -18,7 +18,7 @@ const int window_height = 800;
 
 bool firstMouse = true; // for mouse_callback
 float lastX = 800.0f / 2.0;
-float lastY = 600.0 / 2.0;
+float lastY = 800.0 / 2.0;
 int i_row = 0;
 float fov = 66.0f;
 bool isCursorCaptured = true; // Initially capture the cursor
